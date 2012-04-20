@@ -47,5 +47,4 @@ public final class OntointActivator extends AbstractUIPlugin {
     public static OntointActivator getDefault() {
         return OntointActivator.plugin;
     }
-
 }

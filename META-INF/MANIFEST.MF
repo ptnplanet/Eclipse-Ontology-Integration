@@ -6,8 +6,8 @@ Bundle-Version: 1.0.0
 Bundle-Activator: de.unipassau.im.ontoint.OntointActivator
 Bundle-Vendor: %Bundle-Vendor
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
- org.eclipse.ui.ide,
- org.eclipse.core.resources
+ org.eclipse.core.runtime
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: owlapi-3.2.4/owlapi-bin.jar,
+ src/
