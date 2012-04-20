@@ -3,15 +3,16 @@ package de.unipassau.im.ontoint.views;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 
-public class OntologyManager extends ViewPart {
+public class ClassHierarchyView extends ViewPart {
 
-	public OntologyManager() {
+	public ClassHierarchyView() {
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void createPartControl(Composite parent) {
-		
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override

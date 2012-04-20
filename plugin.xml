@@ -9,7 +9,7 @@
       </category>
       <view
             category="de.unipassau.im.ontoint.views.category"
-            class="de.unipassau.im.ontoint.views.ClassHierarchy"
+            class="de.unipassau.im.ontoint.views.ClassHierarchyView"
             icon="icons/hierarchy.gif"
             id="de.unipassau.im.ontoint.views.classHierarchy"
             name="%ontoint.views.classHierarchy.name"
@@ -17,7 +17,7 @@
       </view>
       <view
             category="de.unipassau.im.ontoint.views.category"
-            class="de.unipassau.im.ontoint.views.OntologyManager"
+            class="de.unipassau.im.ontoint.views.OntologyManagerView"
             icon="icons/view.gif"
             id="de.unipassau.im.ontoint.views.ontologyManager"
             name="%ontoint.views.manageOntologies.name"

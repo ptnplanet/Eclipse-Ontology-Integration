@@ -1,5 +1,11 @@
 package de.unipassau.im.ontoint.importWizards;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -25,6 +31,8 @@ public final class OntologyImportWizardPage extends WizardPage {
     public static final String ID = "de.unipassau.im.ontoint.importWizards."
             + "ontologyImportWizard.mainPage";
 
+    private boolean loadFromURL;
+
     private Button URLSelectButton;
     private Label URLTextFieldLabel;
     private Text sourceURLField;
@@ -37,7 +45,7 @@ public final class OntologyImportWizardPage extends WizardPage {
     protected OntologyImportWizardPage() {
         super(OntologyImportWizardPage.ID);
         this.setTitle("Import Ontology");
-        this.setDescription("Import an ontology from the local filesystem or a remote location.");
+        this.setDescription("Import an ontology from local filesystem or a remote location.");
     }
 
     @Override
@@ -70,6 +78,8 @@ public final class OntologyImportWizardPage extends WizardPage {
 
         this.populate();
         this.updatePageComplete();
+        this.setMessage(null);
+        this.setErrorMessage(null);
     }
 
     /**
@@ -100,6 +110,8 @@ public final class OntologyImportWizardPage extends WizardPage {
      * Enable the URL selection by deactivating the file selection.
      */
     private void enableURLSelection() {
+        this.loadFromURL = true;
+
         this.URLSelectButton.setSelection(true);
         this.URLTextFieldLabel.setEnabled(true);
         this.sourceURLField.setEnabled(true);
@@ -110,12 +122,15 @@ public final class OntologyImportWizardPage extends WizardPage {
         this.fileBrowseButton.setEnabled(false);
 
         this.sourceURLField.setFocus();
+        this.updatePageComplete();
     }
 
     /**
      * Enable the file selection by deactivating the URL selection.
      */
     private void enableFileSelection() {
+        this.loadFromURL = false;
+
         this.fileSelectButton.setSelection(true);
         this.fileTextFieldLabel.setEnabled(true);
         this.sourceFileField.setEnabled(true);
@@ -126,6 +141,7 @@ public final class OntologyImportWizardPage extends WizardPage {
         this.sourceURLField.setEnabled(false);
 
         this.sourceFileField.setFocus();
+        this.updatePageComplete();
     }
 
     /**
@@ -218,9 +234,6 @@ public final class OntologyImportWizardPage extends WizardPage {
      */
     protected void browseForSourceFile() {
         IPath path = this.getSourcePath();
-        if (path == null) {
-            return;
-        }
 
         // Open the file dialog for the user to select the source file.
         FileDialog dialog = new FileDialog(this.getShell(), SWT.OPEN);
@@ -260,8 +273,28 @@ public final class OntologyImportWizardPage extends WizardPage {
      * @return The URL of the source file specified, <code>null</code> if no
      *  URL was specified.
      */
-    public String getSourceURL() {
-        return "";
+    public URL getSourceURL() {
+        String text = this.sourceURLField.getText().trim();
+        if (text.length() == 0) {
+            return null;
+        }
+        try {
+            return new URI(text).toURL();
+        } catch (URISyntaxException e) {
+            return null;
+        } catch (MalformedURLException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns <code>true</code> if the user wants to load an ontology from an
+     * URL and <code>false</code> if the user chose a local file.
+     *
+     * @return If the source selected is an URL.
+     */
+    public boolean isURLSource() {
+        return this.loadFromURL;
     }
 
     /**
@@ -269,5 +302,30 @@ public final class OntologyImportWizardPage extends WizardPage {
      */
     private void updatePageComplete() {
         this.setPageComplete(false);
+        this.setMessage(null);
+        this.setErrorMessage(null);
+
+        if (this.isURLSource()) {
+
+            // If the user selected the URL source, then it has to be valid URL.
+            URL url = this.getSourceURL();
+            if (url != null) {
+                this.setPageComplete(true);
+            } else if (this.sourceURLField.getText().length() > 0) {
+                this.setErrorMessage("Please enter a valid and absolute URL "
+                        + "to load a file from.");
+            }
+        } else {
+
+            // If the user selected the file source, then it has to be valid.
+            IPath path = this.getSourcePath();
+            if ((path != null) && !path.isEmpty()
+                    && new File(path.toString()).canRead()) {
+                this.setPageComplete(true);
+            } else if (path != null) {
+                this.setErrorMessage("Please select an existing and readable "
+                        + "file to load.");
+            }
+        }
     }
 }
