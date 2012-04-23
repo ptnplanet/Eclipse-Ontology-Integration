@@ -1,6 +1,5 @@
 package de.unipassau.im.ontoint.importWizards;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
@@ -12,14 +11,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
-import org.semanticweb.owlapi.io.OWLOntologyCreationIOException;
-import org.semanticweb.owlapi.io.UnparsableOntologyException;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.UnloadableImportException;
 
 import de.unipassau.im.ontoint.OntointActivator;
-import de.unipassau.im.ontoint.OntointLog;
-import de.unipassau.im.ontoint.model.OntologyManager;
 
 /**
  * The import ontology wizard dialog.
