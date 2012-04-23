@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -36,14 +37,42 @@ public final class WrappedOWLOntologyManager {
 
     public boolean loadOntologyFromFile(File file)
             throws OWLOntologyCreationException {
-        return (this.wrappedManager.loadOntologyFromOntologyDocument(file)
-                instanceof OWLOntology);
+
+        // Try loading the ontology file.
+        OWLOntology loadedOntology =
+                this.wrappedManager.loadOntologyFromOntologyDocument(file);
+
+        // On success, notify the listeners.
+        if (loadedOntology instanceof OWLOntology) {
+            this.notifyListeners(new WrappedOWLOntologyManagerEvent(this,
+                    new OWLOntology[] {loadedOntology}, null));
+            return true;
+        }
+        return false;
     }
 
     public boolean loadOntologyFromURL(URL url)
             throws OWLOntologyCreationException, URISyntaxException {
-        return (this.wrappedManager.loadOntologyFromOntologyDocument(
-                    IRI.create(url))
-                instanceof OWLOntology);
+
+        // Try loading the ontology url.
+        OWLOntology loadedOntology =
+                this.wrappedManager.loadOntologyFromOntologyDocument(
+                        IRI.create(url));
+
+        // On success, notify the listeners.
+        if (loadedOntology instanceof OWLOntology) {
+            this.notifyListeners(new WrappedOWLOntologyManagerEvent(this,
+                    new OWLOntology[] {loadedOntology}, null));
+            return true;
+        }
+        return false;
+    }
+
+    private void notifyListeners(final WrappedOWLOntologyManagerEvent event) {
+        for (Iterator<IWrappedOWLOntologyManagerChangeListener> it =
+                this.listeners.iterator(); it.hasNext();) {
+
+            it.next().wrappedOWLOntologyManagerChanged(event);
+        }
     }
 }
