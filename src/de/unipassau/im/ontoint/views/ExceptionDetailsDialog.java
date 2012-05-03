@@ -264,8 +264,8 @@ public class ExceptionDetailsDialog extends AbstractDetailsDialog {
         composite.setLayout(layout);
 
         // Gather Data from bundle manifest.
-        Dictionary<?, ?> bundleHeaders = bundle.getHeaders();
-        String pluginId = bundle.getSymbolicName();
+        Dictionary<?, ?> bundleHeaders = this.bundle.getHeaders();
+        String pluginId = this.bundle.getSymbolicName();
         String pluginVendor = (String) bundleHeaders.get("Bundle-Vendor");
         String pluginName = (String) bundleHeaders.get("Bundle-Name");
         String pluginVersion = (String) bundleHeaders.get("Bundle-Version");

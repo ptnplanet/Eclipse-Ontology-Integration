@@ -38,6 +38,12 @@ public final class OntointActivator extends AbstractUIPlugin {
     public void start(final BundleContext context) throws Exception {
         super.start(context);
         OntointActivator.plugin = this;
+
+        // Register an icon for this plugin's jobs.
+        this.getWorkbench().getProgressService().registerIconForFamily(
+                OntointActivator.imageDescriptorFromPlugin(
+                        OntointActivator.PLUGIN_ID, "/icons/import.gif"),
+                OntointActivator.PLUGIN_ID);
     }
 
     /**

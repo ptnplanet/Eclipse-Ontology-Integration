@@ -14,18 +14,37 @@ import de.unipassau.im.ontoint.importWizards.OntologyImportWizard;
 /**
  * Basic command handler, that opens the import ontology wizard.
  */
-public class OpenImportWizard implements IHandler {
+public class OpenImportWizardHandler implements IHandler {
 
-    @Override
+    /**
+     * This handler's id.
+     */
+    public static final String ID =
+            "de.unipassau.im.ontoint.commands.openImportWizard";
+
+    /**
+     * {@inheritDoc}
+     */
     public final void addHandlerListener(
             final IHandlerListener handlerListener) {
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
+    public final void removeHandlerListener(
+            final IHandlerListener handlerListener) {
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public final void dispose() {
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final Object execute(final ExecutionEvent event)
             throws ExecutionException {
 
@@ -40,19 +59,18 @@ public class OpenImportWizard implements IHandler {
         return null;
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final boolean isEnabled() {
         return true;
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public final boolean isHandled() {
         return true;
-    }
-
-    @Override
-    public final void removeHandlerListener(
-            final IHandlerListener handlerListener) {
     }
 
 }

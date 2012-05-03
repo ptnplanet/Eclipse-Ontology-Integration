@@ -1,18 +1,22 @@
 package de.unipassau.im.ontoint.importWizards;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.net.URL;
 
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.semanticweb.owlapi.model.IRI;
 
 import de.unipassau.im.ontoint.OntointActivator;
+import de.unipassau.im.ontoint.OntointLog;
+import de.unipassau.im.ontoint.jobs.ImportOntologyFileJob;
+import de.unipassau.im.ontoint.runnables.AsyncOntologyFileLoader;
+import de.unipassau.im.ontoint.runnables.AsyncOntologyURLLoader;
 
 /**
  * The import ontology wizard dialog.
@@ -29,6 +33,11 @@ public class OntologyImportWizard extends Wizard implements IImportWizard {
      * The main wizard page.
      */
     private OntologyImportWizardPage mainPage;
+
+    /**
+     * This wizards workbench.
+     */
+    private IWorkbench workbench;
 
     /**
      * Creates a new ontology import wizard.  The wizard will try to load
@@ -56,35 +65,21 @@ public class OntologyImportWizard extends Wizard implements IImportWizard {
      */
     public final boolean performFinish() {
         final boolean loadFromURL = this.mainPage.isURLSource();
-        final URL sourceURL = this.mainPage.getSourceURL();
-        final IPath sourceFile = this.mainPage.getSourcePath();
+        final IRI sourceIRI = this.mainPage.getSourceIRI();
+        final File sourceFile = this.mainPage.getSourcePath().toFile();
 
-        try {
+        new ImportOntologyFileJob("BLABLA", sourceFile).schedule();
 
-            this.getContainer().run(true, true, new IRunnableWithProgress() {
-
-                public void run(final IProgressMonitor monitor)
-                        throws InvocationTargetException, InterruptedException {
-
-                    monitor.beginTask("Importing Ontology", 2);
-                    Thread.sleep(2000);
-                    monitor.worked(1);
-                    monitor.done();
-                }
-            });
-        } catch (InvocationTargetException e) {
-            return false;
-        } catch (InterruptedException e) {
-            return false;
-        }
         return true;
     }
 
     /**
      * {@inheritDoc}
      */
-    public final void init(final IWorkbench workbench,
-            final IStructuredSelection selection) { }
+    public final void init(final IWorkbench workbenchToUse,
+            final IStructuredSelection selection) {
+        this.workbench = workbench;
+    }
 
     /**
      * {@inheritDoc}

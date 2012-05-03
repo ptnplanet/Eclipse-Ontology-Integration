@@ -1,10 +1,8 @@
 package de.unipassau.im.ontoint.importWizards;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -22,7 +20,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.semanticweb.owlapi.model.IRI;
 
+/**
+ * A wizard page for choosing ontology URL or file locations.
+ */
 public final class OntologyImportWizardPage extends WizardPage {
 
     /**
@@ -31,24 +33,61 @@ public final class OntologyImportWizardPage extends WizardPage {
     public static final String ID = "de.unipassau.im.ontoint.importWizards."
             + "ontologyImportWizard.mainPage";
 
+    /**
+     * <code>true</code> if the user specified an URL or <code>false</code>
+     * if the user specified a file.
+     */
     private boolean loadFromURL;
 
-    private Button URLSelectButton;
-    private Label URLTextFieldLabel;
+    /**
+     * The URL select radio button.
+     */
+    private Button urlSelectButton;
+
+    /**
+     * The URL label.
+     */
+    private Label urlTextFieldLabel;
+
+    /**
+     * The URL text field.
+     */
     private Text sourceURLField;
 
+    /**
+     * The file select radio button.
+     */
     private Button fileSelectButton;
+
+    /**
+     * The file label.
+     */
     private Label fileTextFieldLabel;
+
+    /**
+     * The file text field.
+     */
     private Text sourceFileField;
+
+    /**
+     * The browse for file button.
+     */
     private Button fileBrowseButton;
 
+    /**
+     * Constructs a new page.
+     */
     protected OntologyImportWizardPage() {
         super(OntologyImportWizardPage.ID);
         this.setTitle("Import Ontology");
-        this.setDescription("Import an ontology from local filesystem or a remote location.");
+        this.setDescription(
+                "Import an ontology from local filesystem "
+                + "or a remote location.");
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public void createControl(final Composite parent) {
         final int columnCount = 3;
 
@@ -63,7 +102,7 @@ public final class OntologyImportWizardPage extends WizardPage {
         this.createFileSelectorControls(container);
 
         // Add radio button behavior for the remote URL radio button.
-        this.URLSelectButton.addSelectionListener(new SelectionAdapter() {
+        this.urlSelectButton.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(final SelectionEvent e) {
                 OntologyImportWizardPage.this.enableURLSelection();
             }
@@ -112,8 +151,8 @@ public final class OntologyImportWizardPage extends WizardPage {
     private void enableURLSelection() {
         this.loadFromURL = true;
 
-        this.URLSelectButton.setSelection(true);
-        this.URLTextFieldLabel.setEnabled(true);
+        this.urlSelectButton.setSelection(true);
+        this.urlTextFieldLabel.setEnabled(true);
         this.sourceURLField.setEnabled(true);
 
         this.fileSelectButton.setSelection(false);
@@ -136,8 +175,8 @@ public final class OntologyImportWizardPage extends WizardPage {
         this.sourceFileField.setEnabled(true);
         this.fileBrowseButton.setEnabled(true);
 
-        this.URLSelectButton.setSelection(false);
-        this.URLTextFieldLabel.setEnabled(false);
+        this.urlSelectButton.setSelection(false);
+        this.urlTextFieldLabel.setEnabled(false);
         this.sourceURLField.setEnabled(false);
 
         this.sourceFileField.setFocus();
@@ -161,15 +200,15 @@ public final class OntologyImportWizardPage extends WizardPage {
                 new GridData(GridData.HORIZONTAL_ALIGN_END);
 
         // The remote-location radio button
-        this.URLSelectButton = new Button(container, SWT.RADIO);
-        this.URLSelectButton.setLayoutData(gridSpanData);
-        this.URLSelectButton.setText(
+        this.urlSelectButton = new Button(container, SWT.RADIO);
+        this.urlSelectButton.setLayoutData(gridSpanData);
+        this.urlSelectButton.setText(
                 "Select a URL to load an ontology from.");
 
         // The local-text label
-        this.URLTextFieldLabel = new Label(container, SWT.NONE);
-        this.URLTextFieldLabel.setLayoutData(gridAlignData);
-        this.URLTextFieldLabel.setText("Source URL:");
+        this.urlTextFieldLabel = new Label(container, SWT.NONE);
+        this.urlTextFieldLabel.setLayoutData(gridAlignData);
+        this.urlTextFieldLabel.setText("Source URL:");
 
         // The local-text text field
         this.sourceURLField = new Text(container, SWT.BORDER);
@@ -273,16 +312,19 @@ public final class OntologyImportWizardPage extends WizardPage {
      * @return The URL of the source file specified, <code>null</code> if no
      *  URL was specified.
      */
-    public URL getSourceURL() {
+    public IRI getSourceIRI() {
         String text = this.sourceURLField.getText().trim();
         if (text.length() == 0) {
             return null;
         }
         try {
-            return new URI(text).toURL();
+            URI uri = new URI(text);
+            if (uri.isAbsolute()) {
+                return IRI.create(uri);
+            } else {
+                return null;
+            }
         } catch (URISyntaxException e) {
-            return null;
-        } catch (MalformedURLException e) {
             return null;
         }
     }
@@ -308,8 +350,8 @@ public final class OntologyImportWizardPage extends WizardPage {
         if (this.isURLSource()) {
 
             // If the user selected the URL source, then it has to be valid URL.
-            URL url = this.getSourceURL();
-            if (url != null) {
+            IRI iri = this.getSourceIRI();
+            if (iri != null) {
                 this.setPageComplete(true);
             } else if (this.sourceURLField.getText().length() > 0) {
                 this.setErrorMessage("Please enter a valid and absolute URL "
