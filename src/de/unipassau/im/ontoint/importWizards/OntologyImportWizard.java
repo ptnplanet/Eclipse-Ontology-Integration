@@ -1,10 +1,8 @@
 package de.unipassau.im.ontoint.importWizards;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
-import java.net.URL;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
@@ -13,10 +11,8 @@ import org.eclipse.ui.IWorkbench;
 import org.semanticweb.owlapi.model.IRI;
 
 import de.unipassau.im.ontoint.OntointActivator;
-import de.unipassau.im.ontoint.OntointLog;
 import de.unipassau.im.ontoint.jobs.ImportOntologyFileJob;
-import de.unipassau.im.ontoint.runnables.AsyncOntologyFileLoader;
-import de.unipassau.im.ontoint.runnables.AsyncOntologyURLLoader;
+import de.unipassau.im.ontoint.jobs.ImportOntologyURLJob;
 
 /**
  * The import ontology wizard dialog.
@@ -66,9 +62,17 @@ public class OntologyImportWizard extends Wizard implements IImportWizard {
     public final boolean performFinish() {
         final boolean loadFromURL = this.mainPage.isURLSource();
         final IRI sourceIRI = this.mainPage.getSourceIRI();
-        final File sourceFile = this.mainPage.getSourcePath().toFile();
+        final IPath sourceFile = this.mainPage.getSourcePath();
 
-        new ImportOntologyFileJob("BLABLA", sourceFile).schedule();
+        if (loadFromURL && (sourceIRI != null)) {
+            new ImportOntologyURLJob("Importing Ontology", sourceIRI)
+                .schedule();
+        } else if (sourceFile != null) {
+            new ImportOntologyFileJob("Importing Ontology", sourceFile.toFile())
+                .schedule();
+        } else {
+            return false;
+        }
 
         return true;
     }

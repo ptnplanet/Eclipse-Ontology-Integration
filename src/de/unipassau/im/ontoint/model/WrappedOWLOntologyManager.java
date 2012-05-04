@@ -63,7 +63,7 @@ public final class WrappedOWLOntologyManager {
     }
 
     /**
-     * Notifies the listeners listening.
+     * Notifies the listeners listening about the event given.
      *
      * @param event the event to notify the listeners about
      */
@@ -73,6 +73,18 @@ public final class WrappedOWLOntologyManager {
 
             it.next().wrappedOWLOntologyManagerChanged(event);
         }
+    }
+
+    /**
+     * Notifies the listeners listening about the added and removed ontologies.
+     *
+     * @param added the added ontologies
+     * @param removed the removed ontologies
+     */
+    public void notifyListeners(final Object[] added, final Object[] removed) {
+        WrappedOWLOntologyManagerEvent event =
+                new WrappedOWLOntologyManagerEvent(this, added, removed);
+        this.notifyListeners(event);
     }
 
     /**

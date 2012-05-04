@@ -3,14 +3,15 @@ package de.unipassau.im.ontoint.jobs;
 import java.io.File;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.swt.widgets.Display;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 import de.unipassau.im.ontoint.OntointActivator;
 
-
+/**
+ * An {@link ImportOntologyJob} subclass implementing the loadOntology method
+ * for loading ontologies from Files.
+ */
 public final class ImportOntologyFileJob extends ImportOntologyJob {
 
     /**
@@ -34,19 +35,15 @@ public final class ImportOntologyFileJob extends ImportOntologyJob {
     /**
      * {@inheritDoc}
      */
-    protected OWLOntology loadOntology(final IProgressMonitor monitor) {
+    protected void loadOntology(final IProgressMonitor monitor) {
         monitor.subTask("Loading File " + this.file.getName());
 
-        OWLOntology loadedOntology = null;
         try {
-            loadedOntology = OntointActivator.getDefault().getManager()
-                    .getWrappedManager()
+            this.getManager().getWrappedManager()
                     .loadOntologyFromOntologyDocument(this.file);
         } catch (OWLOntologyCreationException e) {
-            this.appendException(e);
+            // ignored
         }
-
-        return loadedOntology;
     }
 
 }

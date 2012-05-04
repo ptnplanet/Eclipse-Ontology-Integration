@@ -10,14 +10,6 @@ import de.unipassau.im.ontoint.model.WrappedOWLOntologyManager;
 public final class OntologyManagerTableLabelProvider extends LabelProvider
         implements ITableLabelProvider {
 
-    private WrappedOWLOntologyManager ontologyManager;
-
-    public OntologyManagerTableLabelProvider(
-            final WrappedOWLOntologyManager manager) {
-        super();
-        this.ontologyManager = manager;
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -31,16 +23,16 @@ public final class OntologyManagerTableLabelProvider extends LabelProvider
     public String getColumnText(final Object element, final int columnIndex) {
         OWLOntology ontology = (OWLOntology) element;
 
+        final String documentIRI = ontology.getOWLOntologyManager()
+                .getOntologyDocumentIRI(ontology).toString();
+
         switch (columnIndex) {
         case 0:
-//            String documentIRI = ontology.getDocumentIRI().toString();
-//            return documentIRI.substring(documentIRI.lastIndexOf('/') + 1);
-            return "laala";
+            return documentIRI.substring(documentIRI.lastIndexOf('/') + 1);
         case 1:
-//            return ontology.getWrappedOntology().getOntologyID().toString();
-            return "blabla";
+            return documentIRI;
         default:
-            return "";
+            return ontology.getOntologyID().toString();
         }
     }
 
