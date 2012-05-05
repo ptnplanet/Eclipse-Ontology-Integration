@@ -48,6 +48,14 @@
             class="de.unipassau.im.ontoint.handlers.OpenImportWizardHandler"
             commandId="de.unipassau.im.ontoint.commands.openImportWizard">
       </handler>
+      <handler
+            class="de.unipassau.im.ontoint.handlers.RemoveOntologyHandler"
+            commandId="de.unipassau.im.ontoint.commands.removeOntology">
+      </handler>
+      <handler
+            class="de.unipassau.im.ontoint.handlers.ShowClassHierarchyHandler"
+            commandId="de.unipassau.im.ontoint.commands.showClassHierarchy">
+      </handler>
    </extension> <extension
          point="org.eclipse.ui.commands">
       <category
@@ -60,6 +68,18 @@
             id="de.unipassau.im.ontoint.commands.openImportWizard"
             name="%ontoint.commands.openImportWizard.name">
       </command>
+   <command
+         categoryId="de.unipassau.im.ontoint.commands.category"
+         description="%ontoint.commands.removeOntology.description"
+         id="de.unipassau.im.ontoint.commands.removeOntology"
+         name="%ontoint.commands.removeOntology.name">
+   </command>
+   <command
+         categoryId="de.unipassau.im.ontoint.commands.category"
+         description="%ontoint.commands.showClassHierarchy.name"
+         id="de.unipassau.im.ontoint.commands.showClassHierarchy"
+         name="%ontoint.commands.showClassHierarchy.name">
+   </command>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -73,6 +93,28 @@
                label="%ontoint.commands.openImportWizard.label"
                style="push"
                tooltip="%ontoint.commands.openImportWizard.tooltip">
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:de.unipassau.im.ontoint.views.ontologyManager?after=additions">
+         <command
+               commandId="de.unipassau.im.ontoint.commands.removeOntology"
+               icon="icons/delete.gif"
+               label="%ontoint.commands.removeOntology.label"
+               style="push"
+               tooltip="%ontoint.commands.removeOntology.tooltip">
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:de.unipassau.im.ontoint.views.ontologyManager?after=additions">
+         <command
+               commandId="de.unipassau.im.ontoint.commands.showClassHierarchy"
+               icon="icons/hierarchy.gif"
+               label="%ontoint.commands.showClassHierarchy.label"
+               style="push"
+               tooltip="%ontoint.commands.showClassHierarchy.tooltip">
          </command>
       </menuContribution>
    </extension>

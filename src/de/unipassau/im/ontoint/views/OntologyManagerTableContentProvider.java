@@ -66,7 +66,7 @@ public final class OntologyManagerTableContentProvider
      * {@inheritDoc}
      */
     public Object[] getElements(final Object inputElement) {
-        return this.manager.getWrappedManager().getOntologies().toArray();
+        return this.manager.getWrappedOntologies();
     }
 
 }

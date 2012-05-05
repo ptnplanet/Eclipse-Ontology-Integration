@@ -12,11 +12,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyLoaderListener;
-import org.semanticweb.owlapi.model.OWLOntologyLoaderListener.LoadingFinishedEvent;
-import org.semanticweb.owlapi.model.OWLOntologyLoaderListener.LoadingStartedEvent;
 
 import de.unipassau.im.ontoint.OntointActivator;
 import de.unipassau.im.ontoint.OntointLog;
+import de.unipassau.im.ontoint.model.WrappedOWLOntology;
 import de.unipassau.im.ontoint.model.WrappedOWLOntologyManager;
 
 /**
@@ -104,12 +103,12 @@ public abstract class ImportOntologyJob extends Job
      *
      * @param loadedOntology the ontology to hand over to the UI
      */
-    private void syncWithUI(final OWLOntology loadedOntology) {
+    private void syncWithUI(final WrappedOWLOntology loadedOntology) {
         Display.getDefault().syncExec(new Runnable() {
             public void run() {
 
                 OntointActivator.getDefault().getManager().notifyListeners(
-                        new OWLOntology[] {loadedOntology}, null);
+                        new WrappedOWLOntology[] {loadedOntology}, null);
             }
         });
     }
@@ -165,9 +164,9 @@ public abstract class ImportOntologyJob extends Job
     public final void finishedLoadingOntology(
             final LoadingFinishedEvent event) {
         if (event.isSuccessful()) {
-            this.syncWithUI(
+            this.syncWithUI(this.manager.getWrappedOntology(
                     this.manager.getWrappedManager().getOntology(
-                            event.getOntologyID()));
+                            event.getOntologyID())));
         } else {
             this.appendException(event.getException());
         }

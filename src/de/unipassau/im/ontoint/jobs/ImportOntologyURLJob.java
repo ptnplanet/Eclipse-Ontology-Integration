@@ -1,11 +1,11 @@
 package de.unipassau.im.ontoint.jobs;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import java.io.File;
 
-import de.unipassau.im.ontoint.OntointActivator;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
 /**
  * An {@link ImportOntologyJob} subclass implementing the loadOntology method

@@ -16,6 +16,11 @@ public final class OntointActivator extends AbstractUIPlugin {
     public static final String PLUGIN_ID = "de.unipassau.im.ontoint";
 
     /**
+     * The image cache for lazy-loading any icons.
+     */
+    private ImageCache imageCache;
+
+    /**
      * The shared instance.
      */
     private static OntointActivator plugin;
@@ -30,6 +35,7 @@ public final class OntointActivator extends AbstractUIPlugin {
      */
     public OntointActivator() {
         this.manager = new WrappedOWLOntologyManager();
+        this.imageCache = new ImageCache();
     }
 
     /**
@@ -51,6 +57,7 @@ public final class OntointActivator extends AbstractUIPlugin {
      */
     public void stop(final BundleContext context) throws Exception {
         OntointActivator.plugin = null;
+        this.imageCache.dispose();
         super.stop(context);
     }
 
@@ -70,6 +77,14 @@ public final class OntointActivator extends AbstractUIPlugin {
      */
     public WrappedOWLOntologyManager getManager() {
         return this.manager;
+    }
+
+    /**
+     * Retrieves this plugin's image cache.
+     * @return
+     */
+    public ImageCache getImageCache() {
+        return this.imageCache;
     }
 
 }

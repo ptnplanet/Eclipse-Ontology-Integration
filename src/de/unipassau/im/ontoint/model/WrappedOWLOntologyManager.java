@@ -2,21 +2,27 @@ package de.unipassau.im.ontoint.model;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Set;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyLoaderListener;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+
+import de.unipassau.im.ontoint.OntointLog;
 
 /**
  * The main entry point to the model.  The {@link WrappedOWLOntologyManager}
  * wrapps an OWL API {@link OWLOntologyManager} and handles the loading and
  * removing of {@link WrappedOWLOntology}s.
  */
-public final class WrappedOWLOntologyManager {
+public final class WrappedOWLOntologyManager
+        implements OWLOntologyLoaderListener {
 
     /**
      * The wrapped {@link OWLOntologyManager}.
@@ -30,13 +36,21 @@ public final class WrappedOWLOntologyManager {
     private Collection<IWrappedOWLOntologyManagerChangeListener> listeners;
 
     /**
+     * A {@link Map} mapping wrapped ontologies to their original.
+     */
+    private Map<OWLOntology, WrappedOWLOntology> wrappedOntologies;
+
+    /**
      * Creates a new {@link WrappedOWLOntologyManager} instance that will use
      * the default {@link OWLOntologyManager}.
      */
     public WrappedOWLOntologyManager() {
         this.wrappedManager = OWLManager.createOWLOntologyManager();
+        this.wrappedManager.addOntologyLoaderListener(this);
         this.listeners =
                 new LinkedList<IWrappedOWLOntologyManagerChangeListener>();
+        this.wrappedOntologies =
+                new Hashtable<OWLOntology, WrappedOWLOntology>();
     }
 
     /**
@@ -94,6 +108,64 @@ public final class WrappedOWLOntologyManager {
      */
     public OWLOntologyManager getWrappedManager() {
         return this.wrappedManager;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void startedLoadingOntology(final LoadingStartedEvent event) { }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void finishedLoadingOntology(final LoadingFinishedEvent event) {
+        if (event.isSuccessful()) {
+
+            // Map the original Ontology to the wrapped ontology.
+            final OWLOntology original =
+                    this.wrappedManager.getOntology(event.getOntologyID());
+            this.wrappedOntologies.put(original,
+                    new WrappedOWLOntology(original, event.isImported(),
+                            event.getDocumentIRI()));
+        }
+    }
+
+    /**
+     * Retrieve the wrapped ontology for the original ontology given.
+     *
+     * @param original the original ontology
+     * @return the wrapped wontology
+     */
+    public WrappedOWLOntology getWrappedOntology(final OWLOntology original) {
+        return this.wrappedOntologies.get(original);
+    }
+
+    /**
+     * Retrieves the wrapped ontologies.
+     *
+     * @return the wrapped ontologies
+     */
+    public WrappedOWLOntology[] getWrappedOntologies() {
+        Collection<WrappedOWLOntology> toReturn =
+                this.wrappedOntologies.values();
+        return toReturn.toArray(new WrappedOWLOntology[toReturn.size()]);
+    }
+
+    /**
+     * Remove an ontology from the loaded set.
+     *
+     * @param array an array of ontologies to remove
+     */
+    public void removeOntologies(final Object[] array) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] instanceof WrappedOWLOntology) {
+                WrappedOWLOntology ontology = (WrappedOWLOntology) array[i];
+                OWLOntology original = ontology.getWrappedOntology();
+                this.wrappedManager.removeOntology(original);
+                this.wrappedOntologies.remove(original);
+                this.notifyListeners(null, new Object[] {ontology});
+            }
+        }
     }
 
 }

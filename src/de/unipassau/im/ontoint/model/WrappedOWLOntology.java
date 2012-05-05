@@ -1,11 +1,18 @@
 package de.unipassau.im.ontoint.model;
 
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Platform;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyID;
+import org.semanticweb.owlapi.reasoner.OWLReasoner;
+import org.semanticweb.owlapi.reasoner.structural.StructuralReasonerFactory;
 
-public class WrappedOWLOntology {
+public class WrappedOWLOntology implements IAdaptable {
 
     private OWLOntology wrappedOntology;
+
+    private OWLReasoner reasoner;
 
     private boolean isImported;
 
@@ -16,6 +23,8 @@ public class WrappedOWLOntology {
         this.wrappedOntology = ontology;
         this.isImported = imported;
         this.documentIRI = iri;
+        this.reasoner =
+                (new StructuralReasonerFactory()).createReasoner(ontology);
     }
 
     public OWLOntology getWrappedOntology() {
@@ -28,6 +37,19 @@ public class WrappedOWLOntology {
 
     public IRI getDocumentIRI() {
         return documentIRI;
+    }
+
+    public OWLReasoner getReasoner() {
+        return this.reasoner;
+    }
+
+    public OWLOntologyID getOntologyID() {
+        return this.wrappedOntology.getOntologyID();
+    }
+
+    @Override
+    public Object getAdapter(final Class adapter) {
+        return Platform.getAdapterManager().getAdapter(this, adapter);
     }
 
 }
