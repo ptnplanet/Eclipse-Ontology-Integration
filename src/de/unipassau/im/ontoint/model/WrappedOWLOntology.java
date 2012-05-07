@@ -52,4 +52,9 @@ public class WrappedOWLOntology implements IAdaptable {
         return Platform.getAdapterManager().getAdapter(this, adapter);
     }
 
+    public String toString() {
+        final String iri = this.documentIRI.toString();
+        return iri.substring(iri.lastIndexOf('/') + 1) + " <" + iri + ">";
+    }
+
 }

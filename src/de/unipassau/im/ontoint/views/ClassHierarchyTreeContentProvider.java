@@ -28,6 +28,7 @@ public class ClassHierarchyTreeContentProvider
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
         this.treeViewer = (TreeViewer) viewer;
         this.input = (WrappedOWLOntology) newInput;
+        this.treeViewer.expandToLevel(2);
     }
 
     public Object[] getElements(Object inputElement) {

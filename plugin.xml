@@ -118,5 +118,23 @@
          </command>
       </menuContribution>
    </extension>
+   <extension
+         id="de.unipassau.im.ontoint.proposalComputer"
+         name="Ontoint Template Proposal"
+         point="org.eclipse.jdt.ui.javaCompletionProposalComputer">
+      <javaCompletionProposalComputer
+            activate="false"
+            categoryId="de.unipassau.im.ontoint.proposalCategory"
+            class="de.unipassau.im.ontoint.proposalComputer.CompletionProposalComputer">
+      </javaCompletionProposalComputer>
+   </extension>
+   <extension
+         id="de.unipassau.im.ontoint.proposalCategory"
+         name="Ontoint Proposals"
+         point="org.eclipse.jdt.ui.javaCompletionProposalComputer">
+      <proposalCategory
+            icon="icons/view.gif">
+      </proposalCategory>
+   </extension>
 
 </plugin>

@@ -10,7 +10,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import de.unipassau.im.ontoint.OntointActivator;
 
-public class RemoveOntologyHandler implements IHandler {
+public final class RemoveOntologyHandler implements IHandler {
 
     /**
      * {@inheritDoc}
