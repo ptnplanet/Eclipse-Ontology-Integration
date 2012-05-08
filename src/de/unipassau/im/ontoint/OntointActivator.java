@@ -1,5 +1,6 @@
 package de.unipassau.im.ontoint;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -81,10 +82,15 @@ public final class OntointActivator extends AbstractUIPlugin {
 
     /**
      * Retrieves this plugin's image cache.
-     * @return
+     *
+     * @return the image cache
      */
     public ImageCache getImageCache() {
         return this.imageCache;
+    }
+
+    public static ImageDescriptor getImageDescriptor(String imageFilePath) {
+        return OntointActivator.imageDescriptorFromPlugin(OntointActivator.PLUGIN_ID, imageFilePath);
     }
 
 }

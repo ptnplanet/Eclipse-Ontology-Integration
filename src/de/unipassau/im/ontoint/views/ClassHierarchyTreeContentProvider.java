@@ -42,6 +42,9 @@ public class ClassHierarchyTreeContentProvider
     }
 
     public Object[] getChildren(Object parentElement) {
+        if (this.input == null) {
+            return new Object[0];
+        }
         OWLClass node = (OWLClass) parentElement;
 
         Set<OWLClass> children = this.input.getReasoner().getSubClasses(
@@ -57,7 +60,6 @@ public class ClassHierarchyTreeContentProvider
     }
 
     public Object getParent(Object element) {
-        // TODO Auto-generated method stub
         return null;
     }
 
