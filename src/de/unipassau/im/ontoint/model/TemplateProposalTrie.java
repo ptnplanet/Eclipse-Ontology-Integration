@@ -7,19 +7,20 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.semanticweb.owlapi.model.OWLEntity;
-
 /**
- * A simple but powerful StringTrie implementation.
+ * A simple but powerful StringTrie implementation.  {@link WrappedOWLEntity}s
+ * are stored in the nodes. The edges are labeled by a single char of the
+ * entity's String ID. Following the chars of an ID down from the root will
+ * result in the node containing the entity with that specific ID.
  *
  * @author Philipp Nolte
  */
-public final class TemplateProposalTrie implements Set<OWLEntity> {
+public final class TemplateProposalTrie implements Set<WrappedOWLEntity> {
 
     /**
      * This node's value.
      */
-    private OWLEntity value;
+    private WrappedOWLEntity value;
 
     /**
      * A dictionary table containing references to the child nodes according to
@@ -35,27 +36,12 @@ public final class TemplateProposalTrie implements Set<OWLEntity> {
      * <code>true</code>.
      */
     private boolean flag = false;
-//
-//    /**
-//     * Creates a new Trie instance with an empty root node.
-//     */
-//    public TemplateProposalTrie() {
-//        this("");
-//    }
-//
-//    /**
-//     * Creates a new Trie instance with the given array as root node's value.
-//     * @param initalValue
-//     */
-//    public TemplateProposalTrie(final String initialValue) {
-//        this.value = initialValue;
-//    }
 
     /**
      * {@inheritDoc}
      */
-    public boolean add(final OWLEntity e) {
-        final String eID = e.toStringID();
+    public boolean add(final WrappedOWLEntity e) {
+        final String eID = e.getShortID().toLowerCase();
 
         /*
          * This Trie implementation can not allow any null values. The
@@ -95,10 +81,10 @@ public final class TemplateProposalTrie implements Set<OWLEntity> {
     /**
      * {@inheritDoc}
      */
-    public boolean addAll(final Collection<? extends OWLEntity> c) {
+    public boolean addAll(final Collection<? extends WrappedOWLEntity> c) {
         boolean toReturn = false;
-        for (OWLEntity e : c)
-            toReturn = toReturn || this.add(e);
+        for (WrappedOWLEntity e : c)
+            toReturn = this.add(e) || toReturn;
         return toReturn;
     }
 
@@ -116,9 +102,9 @@ public final class TemplateProposalTrie implements Set<OWLEntity> {
     public boolean contains(final Object o) {
         if (o == null)
             throw new NullPointerException();
-        if (!(o instanceof OWLEntity))
+        if (!(o instanceof WrappedOWLEntity))
             return false;
-        char[] array = ((OWLEntity) o).toStringID().toCharArray();
+        char[] array = ((WrappedOWLEntity) o).getID().toCharArray();
 
         // Try finding the array by traversing the edges one element at a time.
         TemplateProposalTrie node = this;
@@ -154,20 +140,19 @@ public final class TemplateProposalTrie implements Set<OWLEntity> {
      * {@inheritDoc}
      */
     @Override
-    public Iterator<OWLEntity> iterator() {
-        return new Iterator<OWLEntity>() {
+    public Iterator<WrappedOWLEntity> iterator() {
+        return new Iterator<WrappedOWLEntity>() {
 
             /**
              * Use the iterator from the set returned by the postfixes helper
              * method.
              */
-            private Iterator<OWLEntity> it =
+            private Iterator<WrappedOWLEntity> it =
                     TemplateProposalTrie.this.postfixes().iterator();
 
             /**
              * {@inheritDoc}
              */
-            @Override
             public boolean hasNext() {
                 return this.it.hasNext();
             }
@@ -175,8 +160,7 @@ public final class TemplateProposalTrie implements Set<OWLEntity> {
             /**
              * {@inheritDoc}
              */
-            @Override
-            public OWLEntity next() {
+            public WrappedOWLEntity next() {
                 return this.it.next();
             }
 
@@ -185,7 +169,6 @@ public final class TemplateProposalTrie implements Set<OWLEntity> {
              * remove the object from the Trie structure. Use the Trie's remove
              * function instead.
              */
-            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }
@@ -198,9 +181,10 @@ public final class TemplateProposalTrie implements Set<OWLEntity> {
     public boolean remove(final Object o) {
         if (o == null)
             throw new NullPointerException();
-        if (!(o instanceof OWLEntity))
+        if (!(o instanceof WrappedOWLEntity))
             return false;
-        char[] array = ((OWLEntity) o).toStringID().toCharArray();
+        char[] array = ((WrappedOWLEntity) o).getShortID()
+                .toLowerCase().toCharArray();
 
         /*
          * Zero length arrays can only be removed, when this root node contains
@@ -246,7 +230,7 @@ public final class TemplateProposalTrie implements Set<OWLEntity> {
     public boolean removeAll(final Collection<?> c) {
         boolean toReturn = false;
         for (Object o : c)
-            toReturn = toReturn || this.remove(o);
+            toReturn = this.remove(o) || toReturn;
         return toReturn;
     }
 
@@ -285,8 +269,8 @@ public final class TemplateProposalTrie implements Set<OWLEntity> {
      *
      * @return A <code>Set</code> of all arrays in this (sub)tree.
      */
-    public Set<OWLEntity> postfixes() {
-        final Set<OWLEntity> toReturn = new HashSet<OWLEntity>();
+    public Set<WrappedOWLEntity> postfixes() {
+        final Set<WrappedOWLEntity> toReturn = new HashSet<WrappedOWLEntity>();
         if (this.flag) {
             toReturn.add(this.value);
         }
@@ -305,11 +289,11 @@ public final class TemplateProposalTrie implements Set<OWLEntity> {
      *  prefix. Note, that the prefix will be returned as part of the set's
      *  elements.
      */
-    public Set<OWLEntity> postfixes(final String prefix) {
+    public Set<WrappedOWLEntity> postfixes(final String prefix) {
         TemplateProposalTrie currentNode = this;
         for (char element : prefix.toCharArray()) {
             if (!currentNode.children.containsKey(element)) {
-                return new HashSet<OWLEntity>();
+                return new HashSet<WrappedOWLEntity>();
             }
             currentNode = currentNode.children.get(element);
         }

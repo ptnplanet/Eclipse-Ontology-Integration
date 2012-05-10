@@ -8,6 +8,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -17,84 +18,63 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLEntity;
 
 import de.unipassau.im.ontoint.OntointActivator;
+import de.unipassau.im.ontoint.model.WrappedOWLEntity;
 
-public class CompletionProposalComputer implements
+public final class CompletionProposalComputer implements
         IJavaCompletionProposalComputer {
 
-    public CompletionProposalComputer() {
-        // TODO Auto-generated constructor stub
-    }
-
-    @Override
-    public void sessionStarted() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public List<ICompletionProposal> computeCompletionProposals(
             ContentAssistInvocationContext context, IProgressMonitor monitor) {
         monitor.beginTask("Building proposal list.", IProgressMonitor.UNKNOWN);
 
         final int caretPos = context.getInvocationOffset();
-        final Set<OWLEntity> proposals =
-                OntointActivator.getDefault().getManager()
-                .getAutocompleteTemplates();
+        String toReplace;
+        try {
+            toReplace = context.computeIdentifierPrefix().toString();
+        } catch (BadLocationException e1) {
+            toReplace = "";
+        }
+        toReplace = toReplace.toLowerCase();
+        Set<WrappedOWLEntity> proposals = OntointActivator.getDefault()
+                .getManager().getAutocompleteTemplates(toReplace);
         final List<ICompletionProposal> toReturn =
                 new LinkedList<ICompletionProposal>();
 
-        for (OWLEntity proposal : proposals) {
-            //toReturn.add(new CompletionProposal(proposal, caretPos,
-              //      proposal.length(), caretPos + proposal.length()));
-            final String pID = proposal.toStringID();
-            toReturn.add(new CompletionProposal(
-                    pID,
-                    caretPos,
-                    0,
-                    caretPos + pID.length(),
-                    this.getImageFor(proposal),
-                    pID.substring(pID.lastIndexOf('#') + 1),
-                    null,
-                    proposal.getEntityType().toString()));
+        for (WrappedOWLEntity proposal : proposals) {
+            toReturn.add(new WrappedOWLEntityProposal(proposal, caretPos, caretPos - toReplace.length()));
         }
 
         monitor.done();
         return toReturn;
     }
 
-    private Image getImageFor(OWLEntity entity) {
-        ImageDescriptor desc = null;
-        if (entity.isOWLClass()) {
-            desc = OntointActivator.getImageDescriptor("icons/class.gif");
-        } else if (entity.isOWLNamedIndividual()) {
-            desc = OntointActivator.getImageDescriptor("icons/individual.gif");
-        } else if (entity.isOWLDataProperty()) {
-            desc = OntointActivator.getImageDescriptor("icons/property.gif");
-        } else if (entity.isOWLDatatype()) {
-            desc = OntointActivator.getImageDescriptor("icons/type.gif");
-        }
-        if (desc != null) {
-            return OntointActivator.getDefault().getImageCache().getImage(desc);
-        }
-        return null;
-    }
-
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public List<IContextInformation> computeContextInformation(
-            ContentAssistInvocationContext context, IProgressMonitor monitor) {
+            final ContentAssistInvocationContext context,
+            final IProgressMonitor monitor) {
         return new LinkedList<IContextInformation>();
     }
 
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public String getErrorMessage() {
-        // TODO Auto-generated method stub
         return null;
     }
 
-    @Override
-    public void sessionEnded() {
-        // TODO Auto-generated method stub
+    /**
+     * {@inheritDoc}
+     */
+    public void sessionStarted() { }
 
-    }
+    /**
+     * {@inheritDoc}
+     */
+    public void sessionEnded() { }
 
 }

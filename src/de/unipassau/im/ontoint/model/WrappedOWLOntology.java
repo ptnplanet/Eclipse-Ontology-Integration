@@ -9,7 +9,10 @@ import org.semanticweb.owlapi.reasoner.OWLReasoner;
 import org.semanticweb.owlapi.reasoner.structural.StructuralReasonerFactory;
 
 /**
- * A wrapped {@link OWLOntology} extending the OWLOntology functionality.
+ * A wrapped {@link OWLOntology} extending the OWLOntology functionality.  The
+ * wrapper is necessary to retrieve extra information such as if the ontology
+ * was imported by an other ontology and the original document ID. Each
+ * ontology also needs a reasoner for structural (class hierarchy) reasoning.
  */
 public final class WrappedOWLOntology implements IAdaptable {
 

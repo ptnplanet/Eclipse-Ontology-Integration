@@ -2,19 +2,12 @@ package de.unipassau.im.ontoint.model;
 
 import java.util.Collection;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLDatatype;
-import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLObject;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyLoaderListener;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -53,7 +46,7 @@ public final class WrappedOWLOntologyManager
      * The Trie containing all the string templates available for autocomplete
      * from the managed ontologies.
      */
-    private TemplateProposalTrie autocompleteTrie = new TemplateProposalTrie();
+    private TemplateProposalTrie proposalTrie = new TemplateProposalTrie();
 
     /**
      * Creates a new {@link WrappedOWLOntologyManager} instance that will use
@@ -213,6 +206,7 @@ public final class WrappedOWLOntologyManager
 
                 this.wrappedManager.removeOntology(original);
                 this.wrappedOntologies.remove(original);
+                this.clearTree(original);
 
                 this.notifyListeners(null, new Object[] {wrappedOntology});
             }
@@ -220,44 +214,45 @@ public final class WrappedOWLOntologyManager
     }
 
     /**
-     * Retrieves a Set of {@link OWLEntity}s for autocompletion available from
-     * the managed ontologies.
+     * Retrieves a Set of {@link OWLEntity} proposals available from the
+     * managed ontologies.
      *
      * @return the available templates
      */
-    public Set<OWLEntity> getAutocompleteTemplates() {
-        return this.autocompleteTrie.postfixes();
+    public Set<WrappedOWLEntity> getAutocompleteTemplates() {
+        return this.proposalTrie.postfixes();
     }
 
     /**
-     * Retrieves a Set of {@link OWLEntity}s for autocompletion available from
-     * the managed ontologies relative to the prefix given.
+     * Retrieves a Set of {@link OWLEntity} proposals available from the
+     * managed ontologies relative to the prefix given.
      *
      * @param prefix the prefix to search for
      * @return the available templates
      */
-    public Set<OWLEntity> getAutocompleteTemplates(final String prefix) {
-        return this.autocompleteTrie.postfixes(prefix);
+    public Set<WrappedOWLEntity> getAutocompleteTemplates(final String prefix) {
+        return this.proposalTrie.postfixes(prefix);
     }
 
     /**
-     * Fill the autocomplete template {@link TemplateProposalTrie} with all relevant
-     * template strings.
+     * Fill the proposal template {@link TemplateProposalTrie} with all
+     * relevant template strings.
      *
      * @param ontology the ontology to fill the Trie with
      */
     private void fillTree(final OWLOntology ontology) {
-        for (OWLClass c : ontology.getClassesInSignature(false))
-            this.autocompleteTrie.add(c);
+        this.proposalTrie.addAll(
+                WrappedOWLEntity.getEntitiesFrom(ontology));
+    }
 
-        for (OWLNamedIndividual i : ontology.getIndividualsInSignature(false))
-            this.autocompleteTrie.add(i);
-
-        for (OWLDataProperty d : ontology.getDataPropertiesInSignature(false))
-            this.autocompleteTrie.add(d);
-
-        for (OWLDatatype t : ontology.getDatatypesInSignature(false))
-            this.autocompleteTrie.add(t);
+    /**
+     * Removes all entities from the given ontology from the proposal Trie.
+     *
+     * @param ontology entities belonging to this ontology will be removed
+     */
+    private void clearTree(final OWLOntology ontology) {
+        this.proposalTrie.removeAll(
+                WrappedOWLEntity.getEntitiesFrom(ontology));
     }
 
 }

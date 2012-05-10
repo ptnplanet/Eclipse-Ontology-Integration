@@ -1,9 +1,6 @@
 package de.unipassau.im.ontoint.jobs;
 
-import java.io.File;
-
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 
