@@ -69,8 +69,8 @@ public class BayesClassifier<T, K> extends Classifier<T, K> {
                         new Comparator<Classification<T, K>>() {
 
                     @Override
-                    public int compare(Classification<T, K> o1,
-                            Classification<T, K> o2) {
+                    public int compare(final Classification<T, K> o1,
+                            final Classification<T, K> o2) {
                         int toReturn = Float.compare(
                                 o1.getProbability(), o2.getProbability());
                         if ((toReturn == 0)
@@ -88,11 +88,8 @@ public class BayesClassifier<T, K> extends Classifier<T, K> {
     }
 
     /**
-     * Classifies the given set of features.
-     *
-     * @return The category the set of features is classified as.
+     * {@inheritDoc}
      */
-    @Override
     public Classification<T, K> classify(Collection<T> features) {
         SortedSet<Classification<T, K>> probabilites =
                 this.categoryProbabilities(features);
@@ -104,14 +101,12 @@ public class BayesClassifier<T, K> extends Classifier<T, K> {
     }
 
     /**
-     * Classifies the given set of features. and return the full details of the
-     * classification.
-     *
-     * @return The set of categories the set of features is classified as.
+     * {@inheritDoc}
      */
-    public Collection<Classification<T, K>> classifyDetailed(
+    public DetailedClassification<T, K> classifyDetailed(
             Collection<T> features) {
-        return this.categoryProbabilities(features);
+        return new DetailedClassification<T, K>(features,
+                this.categoryProbabilities(features));
     }
 
 }

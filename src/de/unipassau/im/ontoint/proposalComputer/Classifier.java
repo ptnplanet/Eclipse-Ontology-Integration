@@ -28,14 +28,19 @@ public abstract class Classifier<T, K> implements IFeatureProbability<T, K> {
 
     /**
      * Initial capacity of feature dictionaries. It should be quite big, because
-     * the features will quickly outnumber the categories. 
+     * the features will quickly outnumber the categories.
      */
     private static final int INITIAL_FEATURE_DICTIONARY_CAPACITY = 32;
 
     /**
+     * Initial memory capacity.
+     */
+    private static final int INITIAL_MEMORY_CAPACITY = 1000;
+
+    /**
      * The initial memory capacity or how many classifications are memorized.
      */
-    private int memoryCapacity = 1000;
+    private int memoryCapacity = Classifier.INITIAL_MEMORY_CAPACITY;
 
     /**
      * A dictionary mapping features to their number of occurrences in each
@@ -380,7 +385,7 @@ public abstract class Classifier<T, K> implements IFeatureProbability<T, K> {
      * Train the classifier by telling it that the given features resulted in
      * the given category.
      *
-     * @param classification The classification to learn.
+     * @param classification the classification to learn
      */
     public void learn(Classification<T, K> classification) {
 
@@ -402,10 +407,19 @@ public abstract class Classifier<T, K> implements IFeatureProbability<T, K> {
      * The classify method.  It will retrieve the most likely category for the
      * features given and depends on the concrete classifier implementation.
      *
-     * @param features The features to classify.
-     * @return The category most likely.
+     * @param features the features to classify
+     * @return the classification
      */
     public abstract Classification<T, K> classify(Collection<T> features);
 
+    /**
+     * Classifies the given set of features and returns the full details of the
+     * classification.
+     *
+     * @param features the features to classify
+     * @return The set of categories the set of features is classified as.
+     */
+    public abstract DetailedClassification<T, K> classifyDetailed(
+            Collection<T> features);
 }
 

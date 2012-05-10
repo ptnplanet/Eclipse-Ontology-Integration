@@ -1,5 +1,7 @@
 package de.unipassau.im.ontoint.proposalComputer;
 
+import java.util.Collection;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -14,7 +16,7 @@ import de.unipassau.im.ontoint.OntointActivator;
 import de.unipassau.im.ontoint.model.WrappedOWLEntity;
 
 public final class WrappedOWLEntityProposal implements ICompletionProposal,
-        ICompletionProposalExtension6, Comparable<WrappedOWLEntityProposal> {
+        ICompletionProposalExtension6 {
 
     private int currentOffset;
 
@@ -62,7 +64,8 @@ public final class WrappedOWLEntityProposal implements ICompletionProposal,
      * {@inheritDoc}
      */
     public Point getSelection(final IDocument document) {
-        return new Point(this.replacementOffset + this.currentOffset, 0);
+        return new Point(
+                this.currentOffset + this.proposal.getID().length(), 0);
     }
 
     /**
@@ -101,20 +104,13 @@ public final class WrappedOWLEntityProposal implements ICompletionProposal,
      * Calculates the relevance of this proposal with the given context's
      * features.
      *
+     * @param classification the detailed classfication containing probabilities
+     *  for proposals
      * @return the relevance ranging between 0.0 to 1.0.
      */
-    public float calculateRelevance() {
-        return 0.0f;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public int compareTo(final WrappedOWLEntityProposal o) {
-        if (o == null)
-            return 1;
-
-        return Float.compare(this.calculateRelevance(), o.calculateRelevance());
+    public float calculateRelevance(
+          final DetailedClassification<ContextFeature, String> classification) {
+        return classification.getProbabilityFor(this.proposal.getID());
     }
 
 }
