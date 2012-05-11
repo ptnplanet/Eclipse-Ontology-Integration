@@ -1,4 +1,4 @@
-package de.unipassau.im.ontoint.proposalComputer;
+package de.unipassau.im.ontoint.proposals;
 
 import java.util.Collection;
 import java.util.Dictionary;
@@ -405,6 +405,7 @@ public abstract class Classifier<T, K> implements IFeatureProbability<T, K> {
                 this.decrementFeature(feature, toForget.getCategory());
             this.decrementCategory(toForget.getCategory());
         }
+        System.out.println(classification);
     }
 
     /**

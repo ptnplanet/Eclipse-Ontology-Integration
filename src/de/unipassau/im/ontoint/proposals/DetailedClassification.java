@@ -1,10 +1,19 @@
-package de.unipassau.im.ontoint.proposalComputer;
+package de.unipassau.im.ontoint.proposals;
 
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
 
-public class DetailedClassification<T, K> {
+/**
+ * Instances of this class wrap a collection of classifications in order to
+ * give easy access to the mapping of categories and their probabilities.
+ *
+ * @author Philipp Nolte
+ *
+ * @param <T> the feature class
+ * @param <K> the category class
+ */
+public final class DetailedClassification<T, K> {
 
     /**
      * The classified featureset.
@@ -17,18 +26,14 @@ public class DetailedClassification<T, K> {
     private Map<K, Float> categoryProbabilities;
 
     /**
-     * The probability that the featureset belongs to the given category.
-     */
-    private float probability;
-
-    /**
      * Constructs a new DetailedClassification with the parameters given.
      *
      * @param features the featureset
      * @param classifications a collection of classifications for the given
      *  featureset
      */
-    public DetailedClassification(Collection<T> features, Collection<Classification<T, K>> classifications) {
+    public DetailedClassification(final Collection<T> features,
+            final Collection<Classification<T, K>> classifications) {
         this.featureset = features;
         this.categoryProbabilities = new Hashtable<K, Float>();
         for (Classification<T, K> c : classifications)

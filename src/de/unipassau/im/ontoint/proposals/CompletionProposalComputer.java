@@ -1,7 +1,6 @@
-package de.unipassau.im.ontoint.proposalComputer;
+package de.unipassau.im.ontoint.proposals;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -16,20 +15,37 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import de.unipassau.im.ontoint.OntointActivator;
 import de.unipassau.im.ontoint.model.WrappedOWLEntity;
 
+/**
+ * Proposals for the eclipse ContentAssists System from the ontology integration
+ * are computed with this class.  Basically the class extracts the featureset
+ * from the {@link ContentAssistInvocationContext} and creates a list of
+ * {@link WrappedOWLEntityProposal} wrapping the proposals from the model's
+ * prefix trie.
+ *
+ * @author Philipp Nolte
+ */
 public final class CompletionProposalComputer implements
         IJavaCompletionProposalComputer {
 
-    public static Collection<ContextFeature> getFeatures(final ContentAssistInvocationContext context) {
+    /**
+     * Extracts a collection of features from the given context.
+     *
+     * @param context the context
+     * @return the featureset
+     */
+    public static Collection<ContextFeature> getFeatures(
+            final ContentAssistInvocationContext context) {
+
         String[] features;
         try {
-            features = context.getDocument().get(context.getInvocationOffset() - 20, 30).split("\\s");
+            features = context.getDocument().get(context.getInvocationOffset() - 20, 20).split("\\s");
         } catch (BadLocationException e) {
             features = new String[0];
         }
         Collection<ContextFeature> toReturn = new LinkedList<ContextFeature>();
-        for (String feature : features) {
-            toReturn.add(new ContextFeature(ContextFeature.Feature.ENVIRONMENTSTRING, feature));
-        }
+
+        ContextFeature feature = new ContextFeature(ContextFeature.Feature.ENVIRONMENTSTRING, features[features.length - 1]);
+        toReturn.add(feature);
         return toReturn;
     }
 
@@ -37,7 +53,8 @@ public final class CompletionProposalComputer implements
      * {@inheritDoc}
      */
     public List<ICompletionProposal> computeCompletionProposals(
-            ContentAssistInvocationContext context, IProgressMonitor monitor) {
+            final ContentAssistInvocationContext context,
+            final IProgressMonitor monitor) {
         monitor.beginTask("Building proposal list.", IProgressMonitor.UNKNOWN);
 
         // Get the proposals from the autocomplete trie
@@ -55,8 +72,12 @@ public final class CompletionProposalComputer implements
         final Classifier<ContextFeature, String> classifier =
                 OntointActivator.getDefault().getClassifier();
 
-        // Define the current carret position
+        // Define the current caret position
         final int caretPos = context.getInvocationOffset();
+
+        // Get the featureset.
+        final Collection<ContextFeature> features =
+                CompletionProposalComputer.getFeatures(context);
 
         // Instantiate the list to return
         final List<ICompletionProposal> toReturn =
@@ -67,25 +88,13 @@ public final class CompletionProposalComputer implements
             toReturn.add(new WrappedOWLEntityProposal(
                     proposal,
                     classifier,
-                    CompletionProposalComputer.getFeatures(context),
+                    features,
                     caretPos,
                     caretPos - toReplace.length()));
         }
 
         monitor.done();
         return toReturn;
-    }
-
-    private Set<WrappedOWLEntity> getProposals(
-            final ContentAssistInvocationContext context) {
-        String toReplace = "";
-        try {
-            toReplace = context.computeIdentifierPrefix().toString();
-        } catch (BadLocationException e1) {
-            // ignore
-        }
-        return OntointActivator.getDefault().getManager()
-                .getAutocompleteTemplates(toReplace.toLowerCase());
     }
 
     /**

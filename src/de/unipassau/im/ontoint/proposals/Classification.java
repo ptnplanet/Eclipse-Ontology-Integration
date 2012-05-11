@@ -1,4 +1,4 @@
-package de.unipassau.im.ontoint.proposalComputer;
+package de.unipassau.im.ontoint.proposals;
 
 import java.util.Collection;
 
@@ -78,6 +78,16 @@ public final class Classification<T, K> {
      */
     public K getCategory() {
         return category;
+    }
+
+    public String toString() {
+        String toReturn = "Classification:\n Features[";
+        for (T feature : this.featureset) {
+            toReturn += feature.toString() + ", ";
+        }
+        toReturn += "]\n Class: " + this.category.toString()
+                + "\n Probability: " + this.getProbability();
+        return toReturn;
     }
 
 }

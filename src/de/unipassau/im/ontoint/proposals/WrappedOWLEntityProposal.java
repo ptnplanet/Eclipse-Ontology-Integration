@@ -1,7 +1,6 @@
-package de.unipassau.im.ontoint.proposalComputer;
+package de.unipassau.im.ontoint.proposals;
 
 import java.util.Collection;
-import java.util.Comparator;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -17,20 +16,50 @@ import org.eclipse.swt.graphics.Point;
 import de.unipassau.im.ontoint.OntointActivator;
 import de.unipassau.im.ontoint.model.WrappedOWLEntity;
 
+/**
+ * {@link WrappedOWLEntity} are wrapped within instances of this class
+ * implementing the eclipse template proposal interfaces.
+ *
+ * @author Philipp Nolte
+ */
 public final class WrappedOWLEntityProposal implements ICompletionProposal,
         IJavaCompletionProposal,
         ICompletionProposalExtension6 {
 
+    /**
+     * The classifier to use for relevance calculation.
+     */
     private Classifier<ContextFeature, String> classifier;
 
+    /**
+     * The current offset (or caret offset) within the document.
+     */
     private int currentOffset;
 
+    /**
+     * The offset of the string to be replaced.
+     */
     private int replacementOffset;
 
+    /**
+     * The wrapped proposal.
+     */
     private WrappedOWLEntity proposal;
 
+    /**
+     * The set of features.
+     */
     private Collection<ContextFeature> featureset;
 
+    /**
+     * Constructs a new proposal with the information and context given.
+     *
+     * @param entity the entity to propose
+     * @param cls the classifier to use for relevance calculation
+     * @param features the set of features of the enclosing context
+     * @param caretPosition the current caret position in the document
+     * @param contextStart the offset of the replacement string
+     */
     public WrappedOWLEntityProposal(final WrappedOWLEntity entity,
             final Classifier<ContextFeature, String> cls,
             final Collection<ContextFeature> features,
@@ -52,7 +81,9 @@ public final class WrappedOWLEntityProposal implements ICompletionProposal,
     public StyledString getStyledDisplayString() {
         final StyledString toReturn =
                 new StyledString(this.proposal.getShortID());
-        toReturn.append(" [".concat(Integer.toString(this.getRelevance())).concat("] "), StyledString.COUNTER_STYLER);
+        toReturn.append(" [".concat(
+                    Integer.toString(this.getRelevance())).concat("] "),
+                StyledString.COUNTER_STYLER);
         toReturn.append(" - ".concat(this.proposal.getID()),
                 StyledString.QUALIFIER_STYLER);
         return toReturn;
@@ -67,12 +98,12 @@ public final class WrappedOWLEntityProposal implements ICompletionProposal,
                     this.replacementOffset,
                     this.currentOffset - this.replacementOffset,
                     this.proposal.getID());
+
+            // Learn the user selection
+            this.classifier.learn(this.proposal.getID(), this.featureset);
         } catch (BadLocationException e) {
             // ignore
         }
-
-        // Learn the user selection
-        this.classifier.learn(this.proposal.getID(), this.featureset);
     }
 
     /**
@@ -119,9 +150,7 @@ public final class WrappedOWLEntityProposal implements ICompletionProposal,
      * {@inheritDoc}
      */
     public int getRelevance() {
-        if (this.classifier == null)
-            return 0;
-        if (this.featureset == null)
+        if ((this.classifier == null) || (this.featureset == null))
             return 0;
         return Math.round(this.classifier.classifyDetailed(this.featureset)
                 .getProbabilityFor(this.proposal.getID()) * 100.0f);

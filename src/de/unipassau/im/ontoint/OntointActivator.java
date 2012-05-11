@@ -1,14 +1,16 @@
 package de.unipassau.im.ontoint;
 
+import java.io.File;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import de.unipassau.im.ontoint.jobs.ImportOntologyFileJob;
 import de.unipassau.im.ontoint.model.WrappedOWLOntologyManager;
-import de.unipassau.im.ontoint.proposalComputer.BayesClassifier;
-import de.unipassau.im.ontoint.proposalComputer.Classifier;
-import de.unipassau.im.ontoint.proposalComputer.ContextFeature;
-import de.unipassau.im.ontoint.proposalComputer.WrappedOWLEntityProposal;
+import de.unipassau.im.ontoint.proposals.BayesClassifier;
+import de.unipassau.im.ontoint.proposals.Classifier;
+import de.unipassau.im.ontoint.proposals.ContextFeature;
 
 /**
  * The activator class controls the plug-in life cycle.
@@ -61,6 +63,9 @@ public final class OntointActivator extends AbstractUIPlugin {
                 OntointActivator.imageDescriptorFromPlugin(
                         OntointActivator.PLUGIN_ID, "/icons/import.gif"),
                 OntointActivator.PLUGIN_ID);
+
+        new ImportOntologyFileJob("Importing Ontology", new File("/Library/WebServer/Documents/Astronomy.owl"))
+        .schedule();
     }
 
     /**

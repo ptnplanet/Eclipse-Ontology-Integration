@@ -1,4 +1,4 @@
-package de.unipassau.im.ontoint.proposalComputer;
+package de.unipassau.im.ontoint.proposals;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -30,6 +30,11 @@ public final class BayesClassifier<T, K> extends Classifier<T, K> {
      * Cached classification values.
      */
     private SortedSet<Classification<T, K>> cache;
+
+    /**
+     * The cached classification value belongs to this featureset.
+     */
+    private Collection<T> cachedFeatureset;
 
     /**
      * Calculates the product of all feature probabilities: PROD(P(featI|cat).
@@ -112,10 +117,11 @@ public final class BayesClassifier<T, K> extends Classifier<T, K> {
      */
     private SortedSet<Classification<T, K>> cachedCategoryProbabilities(
             final Collection<T> features) {
-        if (!cacheValid) {
+        if (!features.equals(this.cachedFeatureset))
+            this.cacheValid = false;
+        if (!this.cacheValid)
             this.cache = this.categoryProbabilities(features);
-            this.cacheValid = true;
-        }
+        this.cacheValid = true;
         return this.cache;
     }
 
@@ -145,7 +151,7 @@ public final class BayesClassifier<T, K> extends Classifier<T, K> {
      * {@inheritDoc}
      */
     public void setMemoryCapacity(final int memoryCapacity) {
-        this.cacheValid = false;
+        this.invalidateCache();
         super.setMemoryCapacity(memoryCapacity);
     }
 
@@ -153,7 +159,7 @@ public final class BayesClassifier<T, K> extends Classifier<T, K> {
      * {@inheritDoc}
      */
     public void learn(final K category, final Collection<T> features) {
-        this.cacheValid = false;
+        this.invalidateCache();
         super.learn(category, features);
     }
 
@@ -161,8 +167,14 @@ public final class BayesClassifier<T, K> extends Classifier<T, K> {
      * {@inheritDoc}
      */
     public void learn(final Classification<T, K> classification) {
-        this.cacheValid = false;
+        this.invalidateCache();
         super.learn(classification);
     }
 
+    public void invalidateCache() {
+        this.cacheValid = false;
+        System.out.println("Cache invalid");
+    }
+
 }
+

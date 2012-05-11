@@ -125,7 +125,7 @@
       <javaCompletionProposalComputer
             activate="false"
             categoryId="de.unipassau.im.ontoint.proposalCategory"
-            class="de.unipassau.im.ontoint.proposalComputer.CompletionProposalComputer">
+            class="de.unipassau.im.ontoint.proposals.CompletionProposalComputer">
       </javaCompletionProposalComputer>
    </extension>
    <extension
