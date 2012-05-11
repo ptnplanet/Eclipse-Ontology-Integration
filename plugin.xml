@@ -130,7 +130,7 @@
    </extension>
    <extension
          id="de.unipassau.im.ontoint.proposalCategory"
-         name="Ontoint Proposals"
+         name="Ontoint Proposal Category"
          point="org.eclipse.jdt.ui.javaCompletionProposalComputer">
       <proposalCategory
             icon="icons/view.gif">

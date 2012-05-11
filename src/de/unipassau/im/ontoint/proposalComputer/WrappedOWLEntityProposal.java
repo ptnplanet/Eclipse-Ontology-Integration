@@ -1,8 +1,10 @@
 package de.unipassau.im.ontoint.proposalComputer;
 
 import java.util.Collection;
+import java.util.Comparator;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -16,7 +18,10 @@ import de.unipassau.im.ontoint.OntointActivator;
 import de.unipassau.im.ontoint.model.WrappedOWLEntity;
 
 public final class WrappedOWLEntityProposal implements ICompletionProposal,
+        IJavaCompletionProposal,
         ICompletionProposalExtension6 {
+
+    private Classifier<ContextFeature, String> classifier;
 
     private int currentOffset;
 
@@ -24,13 +29,19 @@ public final class WrappedOWLEntityProposal implements ICompletionProposal,
 
     private WrappedOWLEntity proposal;
 
+    private Collection<ContextFeature> featureset;
+
     public WrappedOWLEntityProposal(final WrappedOWLEntity entity,
+            final Classifier<ContextFeature, String> cls,
+            final Collection<ContextFeature> features,
             final int caretPosition, final int contextStart) {
         Assert.isNotNull(entity);
         Assert.isTrue(caretPosition >= 0);
         Assert.isTrue(contextStart >= 0);
 
         this.proposal = entity;
+        this.classifier = cls;
+        this.featureset = features;
         this.currentOffset = caretPosition;
         this.replacementOffset = contextStart;
     }
@@ -41,6 +52,7 @@ public final class WrappedOWLEntityProposal implements ICompletionProposal,
     public StyledString getStyledDisplayString() {
         final StyledString toReturn =
                 new StyledString(this.proposal.getShortID());
+        toReturn.append(" [".concat(Integer.toString(this.getRelevance())).concat("] "), StyledString.COUNTER_STYLER);
         toReturn.append(" - ".concat(this.proposal.getID()),
                 StyledString.QUALIFIER_STYLER);
         return toReturn;
@@ -58,6 +70,9 @@ public final class WrappedOWLEntityProposal implements ICompletionProposal,
         } catch (BadLocationException e) {
             // ignore
         }
+
+        // Learn the user selection
+        this.classifier.learn(this.proposal.getID(), this.featureset);
     }
 
     /**
@@ -101,16 +116,16 @@ public final class WrappedOWLEntityProposal implements ICompletionProposal,
     }
 
     /**
-     * Calculates the relevance of this proposal with the given context's
-     * features.
-     *
-     * @param classification the detailed classfication containing probabilities
-     *  for proposals
-     * @return the relevance ranging between 0.0 to 1.0.
+     * {@inheritDoc}
      */
-    public float calculateRelevance(
-          final DetailedClassification<ContextFeature, String> classification) {
-        return classification.getProbabilityFor(this.proposal.getID());
+    public int getRelevance() {
+        if (this.classifier == null)
+            return 0;
+        if (this.featureset == null)
+            return 0;
+        return Math.round(this.classifier.classifyDetailed(this.featureset)
+                .getProbabilityFor(this.proposal.getID()) * 100.0f);
     }
 
 }
+

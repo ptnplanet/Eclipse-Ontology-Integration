@@ -5,6 +5,10 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import de.unipassau.im.ontoint.model.WrappedOWLOntologyManager;
+import de.unipassau.im.ontoint.proposalComputer.BayesClassifier;
+import de.unipassau.im.ontoint.proposalComputer.Classifier;
+import de.unipassau.im.ontoint.proposalComputer.ContextFeature;
+import de.unipassau.im.ontoint.proposalComputer.WrappedOWLEntityProposal;
 
 /**
  * The activator class controls the plug-in life cycle.
@@ -32,11 +36,17 @@ public final class OntointActivator extends AbstractUIPlugin {
     private WrappedOWLOntologyManager manager;
 
     /**
+     * The classifier used for relevance computation of template proposals.
+     */
+    private Classifier<ContextFeature, String> classifier;
+
+    /**
      * The constructor.
      */
     public OntointActivator() {
-        this.manager = new WrappedOWLOntologyManager();
         this.imageCache = new ImageCache();
+        this.manager = new WrappedOWLOntologyManager();
+        this.classifier = new BayesClassifier<ContextFeature, String>();
     }
 
     /**
@@ -89,8 +99,20 @@ public final class OntointActivator extends AbstractUIPlugin {
         return this.imageCache;
     }
 
+    /**
+     * Shortcut for
+     * {@link OntointActivator#imageDescriptorFromPlugin(String, String)}.
+     *
+     * @param imageFilePath the image path
+     * @return the image descriptor
+     */
     public static ImageDescriptor getImageDescriptor(String imageFilePath) {
-        return OntointActivator.imageDescriptorFromPlugin(OntointActivator.PLUGIN_ID, imageFilePath);
+        return OntointActivator.imageDescriptorFromPlugin(
+                OntointActivator.PLUGIN_ID, imageFilePath);
+    }
+
+    public Classifier<ContextFeature, String> getClassifier() {
+        return this.classifier;
     }
 
 }

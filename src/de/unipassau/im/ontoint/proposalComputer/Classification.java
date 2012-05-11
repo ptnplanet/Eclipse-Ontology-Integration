@@ -11,7 +11,7 @@ import java.util.Collection;
  * @param <T> The feature class.
  * @param <K> The category class.
  */
-public class Classification<T, K> {
+public final class Classification<T, K> {
 
     /**
      * The classified featureset.
@@ -30,33 +30,33 @@ public class Classification<T, K> {
 
     /**
      * Constructs a new Classification with the parameters given and a default
-     * probability of 1.
+     * probability of 0.
      *
-     * @param featureset The featureset.
-     * @param category The category.
+     * @param features The featureset.
+     * @param cat The category.
      */
-    public Classification(Collection<T> featureset, K category) {
-        this(featureset, category, 1.0f);
+    public Classification(final Collection<T> features, final K cat) {
+        this(features, cat, 0.0f);
     }
 
     /**
      * Constructs a new Classification with the parameters given.
      *
-     * @param featureset The featureset.
-     * @param category The category.
-     * @param probability The probability.
+     * @param features the featureset
+     * @param cat the category
+     * @param prob the probability
      */
-    public Classification(Collection<T> featureset, K category,
-            float probability) {
-        this.featureset = featureset;
-        this.category = category;
-        this.probability = probability;
+    public Classification(final Collection<T> features, final K cat,
+            final float prob) {
+        this.featureset = features;
+        this.category = cat;
+        this.probability = prob;
     }
 
     /**
      * Retrieves the featureset classified.
      *
-     * @return The featureset.
+     * @return the featureset
      */
     public Collection<T> getFeatureset() {
         return featureset;
@@ -64,7 +64,8 @@ public class Classification<T, K> {
 
     /**
      * Retrieves the classification's probability.
-     * @return
+     *
+     * @return the probability
      */
     public float getProbability() {
         return this.probability;
@@ -73,7 +74,7 @@ public class Classification<T, K> {
     /**
      * Retrieves the category the featureset was classified as.
      *
-     * @return The category.
+     * @return the category
      */
     public K getCategory() {
         return category;

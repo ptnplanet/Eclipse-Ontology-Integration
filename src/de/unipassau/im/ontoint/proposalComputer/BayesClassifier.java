@@ -10,12 +10,26 @@ import java.util.TreeSet;
  * classifier implements a naive Bayes approach to classifying a given set of
  * features: classify(feat1,...,featN) = argmax(P(cat)*PROD(P(featI|cat)
  *
+ * This implementation also includes basic caching of category probability
+ * values. The cache lifetime expires as soon as the classifier learns new
+ * classifications.
+ *
  * @author Philipp Nolte
  *
  * @param <T> The feature class.
  * @param <K> The category class.
  */
-public class BayesClassifier<T, K> extends Classifier<T, K> {
+public final class BayesClassifier<T, K> extends Classifier<T, K> {
+
+    /**
+     * <code>true</code> if the cache values are up-to-date.
+     */
+    private boolean cacheValid = false;
+
+    /**
+     * Cached classification values.
+     */
+    private SortedSet<Classification<T, K>> cache;
 
     /**
      * Calculates the product of all feature probabilities: PROD(P(featI|cat).
@@ -24,8 +38,8 @@ public class BayesClassifier<T, K> extends Classifier<T, K> {
      * @param category The category to test for.
      * @return The product of all feature probabilities.
      */
-    private float featuresProbabilityProduct(Collection<T> features,
-            K category) {
+    private float featuresProbabilityProduct(final Collection<T> features,
+            final K category) {
         float product = 1.0f;
         for (T feature : features)
             product *= this.featureWeighedAverage(feature, category);
@@ -41,10 +55,11 @@ public class BayesClassifier<T, K> extends Classifier<T, K> {
      * @return The probability that the features can be classified as the
      *    category.
      */
-    private float categoryProbability(Collection<T> features, K category) {
+    private float categoryProbability(final Collection<T> features,
+            final K category) {
         return ((float) this.categoryCount(category)
                     / (float) this.getCategoriesTotal())
-                * featuresProbabilityProduct(features, category);
+                * this.featuresProbabilityProduct(features, category);
     }
 
     /**
@@ -55,7 +70,7 @@ public class BayesClassifier<T, K> extends Classifier<T, K> {
      * @return A sorted <code>Set</code> of category-probability-entries.
      */
     private SortedSet<Classification<T, K>> categoryProbabilities(
-            Collection<T> features) {
+            final Collection<T> features) {
 
         /*
          * Sort the set according to the possibilities. Because we have to sort
@@ -68,7 +83,9 @@ public class BayesClassifier<T, K> extends Classifier<T, K> {
                 new TreeSet<Classification<T, K>>(
                         new Comparator<Classification<T, K>>() {
 
-                    @Override
+                    /**
+                     * {@inheritDoc}
+                     */
                     public int compare(final Classification<T, K> o1,
                             final Classification<T, K> o2) {
                         int toReturn = Float.compare(
@@ -88,11 +105,26 @@ public class BayesClassifier<T, K> extends Classifier<T, K> {
     }
 
     /**
+     * Retrieves a valid set of category probabilities.
+     *
+     * @param features the featureset
+     * @return the values (may be cached)
+     */
+    private SortedSet<Classification<T, K>> cachedCategoryProbabilities(
+            final Collection<T> features) {
+        if (!cacheValid) {
+            this.cache = this.categoryProbabilities(features);
+            this.cacheValid = true;
+        }
+        return this.cache;
+    }
+
+    /**
      * {@inheritDoc}
      */
-    public Classification<T, K> classify(Collection<T> features) {
+    public Classification<T, K> classify(final Collection<T> features) {
         SortedSet<Classification<T, K>> probabilites =
-                this.categoryProbabilities(features);
+                this.cachedCategoryProbabilities(features);
 
         if (probabilites.size() > 0) {
             return probabilites.last();
@@ -104,9 +136,33 @@ public class BayesClassifier<T, K> extends Classifier<T, K> {
      * {@inheritDoc}
      */
     public DetailedClassification<T, K> classifyDetailed(
-            Collection<T> features) {
+            final Collection<T> features) {
         return new DetailedClassification<T, K>(features,
-                this.categoryProbabilities(features));
+                this.cachedCategoryProbabilities(features));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setMemoryCapacity(final int memoryCapacity) {
+        this.cacheValid = false;
+        super.setMemoryCapacity(memoryCapacity);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void learn(final K category, final Collection<T> features) {
+        this.cacheValid = false;
+        super.learn(category, features);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void learn(final Classification<T, K> classification) {
+        this.cacheValid = false;
+        super.learn(classification);
     }
 
 }

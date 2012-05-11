@@ -49,7 +49,10 @@ public class DetailedClassification<T, K> {
      * @return
      */
     public float getProbabilityFor(K category) {
-        return this.categoryProbabilities.get(category);
+        Float toReturn = this.categoryProbabilities.get(category);
+        if (toReturn == null)
+            return 0.0f;
+        return toReturn.floatValue();
     }
 
 }
