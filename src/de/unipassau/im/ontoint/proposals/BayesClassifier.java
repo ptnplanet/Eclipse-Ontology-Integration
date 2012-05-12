@@ -1,5 +1,6 @@
 package de.unipassau.im.ontoint.proposals;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.SortedSet;
@@ -12,29 +13,35 @@ import java.util.TreeSet;
  *
  * This implementation also includes basic caching of category probability
  * values. The cache lifetime expires as soon as the classifier learns new
- * classifications.
+ * classifications. The cache will not be serialized.
  *
  * @author Philipp Nolte
  *
  * @param <T> The feature class.
  * @param <K> The category class.
  */
-public final class BayesClassifier<T, K> extends Classifier<T, K> {
+public final class BayesClassifier<T, K> extends Classifier<T, K>
+        implements Serializable {
+
+    /**
+     * SUID.
+     */
+    private static final long serialVersionUID = 2948016701134564991L;
 
     /**
      * <code>true</code> if the cache values are up-to-date.
      */
-    private boolean cacheValid = false;
+    private transient boolean cacheValid = false;
 
     /**
      * Cached classification values.
      */
-    private SortedSet<Classification<T, K>> cache;
+    private transient SortedSet<Classification<T, K>> cache;
 
     /**
      * The cached classification value belongs to this featureset.
      */
-    private Collection<T> cachedFeatureset;
+    private transient Collection<T> cachedFeatureset;
 
     /**
      * Calculates the product of all feature probabilities: PROD(P(featI|cat).
@@ -151,7 +158,7 @@ public final class BayesClassifier<T, K> extends Classifier<T, K> {
      * {@inheritDoc}
      */
     public void setMemoryCapacity(final int memoryCapacity) {
-        this.invalidateCache();
+        this.cacheValid = false;
         super.setMemoryCapacity(memoryCapacity);
     }
 
@@ -159,7 +166,7 @@ public final class BayesClassifier<T, K> extends Classifier<T, K> {
      * {@inheritDoc}
      */
     public void learn(final K category, final Collection<T> features) {
-        this.invalidateCache();
+        this.cacheValid = false;
         super.learn(category, features);
     }
 
@@ -167,13 +174,8 @@ public final class BayesClassifier<T, K> extends Classifier<T, K> {
      * {@inheritDoc}
      */
     public void learn(final Classification<T, K> classification) {
-        this.invalidateCache();
-        super.learn(classification);
-    }
-
-    public void invalidateCache() {
         this.cacheValid = false;
-        System.out.println("Cache invalid");
+        super.learn(classification);
     }
 
 }

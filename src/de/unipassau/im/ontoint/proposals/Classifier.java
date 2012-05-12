@@ -1,5 +1,6 @@
 package de.unipassau.im.ontoint.proposals;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -19,7 +20,13 @@ import java.util.Set;
  * @param <T> A feature class
  * @param <K> A category class
  */
-public abstract class Classifier<T, K> implements IFeatureProbability<T, K> {
+public abstract class Classifier<T, K> implements IFeatureProbability<T, K>,
+        Serializable {
+
+    /**
+     * SUID.
+     */
+    private static final long serialVersionUID = 8419413325454368271L;
 
     /**
      * Initial capacity of category dictionaries.
@@ -405,7 +412,6 @@ public abstract class Classifier<T, K> implements IFeatureProbability<T, K> {
                 this.decrementFeature(feature, toForget.getCategory());
             this.decrementCategory(toForget.getCategory());
         }
-        System.out.println(classification);
     }
 
     /**

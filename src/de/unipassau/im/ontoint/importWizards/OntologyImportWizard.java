@@ -64,15 +64,27 @@ public class OntologyImportWizard extends Wizard implements IImportWizard {
         final IRI sourceIRI = this.mainPage.getSourceIRI();
         final IPath sourceFile = this.mainPage.getSourcePath();
 
+        IDialogSettings settings = this.getDialogSettings();
+
         if (loadFromURL && (sourceIRI != null)) {
             new ImportOntologyURLJob("Importing Ontology", sourceIRI)
                 .schedule();
+            settings.put("sourceSelected", "url");
         } else if (sourceFile != null) {
             new ImportOntologyFileJob("Importing Ontology", sourceFile.toFile())
                 .schedule();
-        } else {
+            settings.put("sourceSelected", "file");
+        } else
             return false;
-        }
+
+        if (sourceIRI != null)
+            settings.put("sourceURLFieldValue", sourceIRI.toString());
+        else
+            settings.put("sourceURLFieldValue", "");
+        if (sourceFile != null)
+            settings.put("sourceFileFieldValue", sourceFile.toString());
+        else
+            settings.put("sourceFileFieldValue", "");
 
         return true;
     }

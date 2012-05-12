@@ -42,9 +42,19 @@ public final class WrappedOWLEntityProposal implements ICompletionProposal,
     private int replacementOffset;
 
     /**
-     * The wrapped proposal.
+     * The String to display.
      */
-    private WrappedOWLEntity proposal;
+    private String displayString;
+
+    /**
+     * The String to actually insert.
+     */
+    private String replaceString;
+
+    /**
+     * The type of this proposal.
+     */
+    private WrappedOWLEntity.Types type;
 
     /**
      * The set of features.
@@ -68,7 +78,9 @@ public final class WrappedOWLEntityProposal implements ICompletionProposal,
         Assert.isTrue(caretPosition >= 0);
         Assert.isTrue(contextStart >= 0);
 
-        this.proposal = entity;
+        this.displayString = entity.getShortID();
+        this.replaceString = entity.getID();
+        this.type = entity.getType();
         this.classifier = cls;
         this.featureset = features;
         this.currentOffset = caretPosition;
@@ -80,11 +92,11 @@ public final class WrappedOWLEntityProposal implements ICompletionProposal,
      */
     public StyledString getStyledDisplayString() {
         final StyledString toReturn =
-                new StyledString(this.proposal.getShortID());
+                new StyledString(this.displayString);
         toReturn.append(" [".concat(
                     Integer.toString(this.getRelevance())).concat("] "),
                 StyledString.COUNTER_STYLER);
-        toReturn.append(" - ".concat(this.proposal.getID()),
+        toReturn.append(" - ".concat(this.replaceString),
                 StyledString.QUALIFIER_STYLER);
         return toReturn;
     }
@@ -97,10 +109,10 @@ public final class WrappedOWLEntityProposal implements ICompletionProposal,
             document.replace(
                     this.replacementOffset,
                     this.currentOffset - this.replacementOffset,
-                    this.proposal.getID());
+                    this.replaceString);
 
             // Learn the user selection
-            this.classifier.learn(this.proposal.getID(), this.featureset);
+            this.classifier.learn(this.replaceString, this.featureset);
         } catch (BadLocationException e) {
             // ignore
         }
@@ -111,14 +123,14 @@ public final class WrappedOWLEntityProposal implements ICompletionProposal,
      */
     public Point getSelection(final IDocument document) {
         return new Point(
-                this.currentOffset + this.proposal.getID().length(), 0);
+                this.currentOffset + this.replaceString.length(), 0);
     }
 
     /**
      * {@inheritDoc}
      */
     public String getAdditionalProposalInfo() {
-        return this.proposal.getID();
+        return this.replaceString;
     }
 
     /**
@@ -133,7 +145,7 @@ public final class WrappedOWLEntityProposal implements ICompletionProposal,
      */
     public Image getImage() {
         final String icon =
-                "icons/" + this.proposal.getType().toString().toLowerCase()
+                "icons/" + this.type.toString().toLowerCase()
                 + ".gif";
         return OntointActivator.getDefault().getImageCache().getImage(
                 OntointActivator.getImageDescriptor(icon));
@@ -153,7 +165,7 @@ public final class WrappedOWLEntityProposal implements ICompletionProposal,
         if ((this.classifier == null) || (this.featureset == null))
             return 0;
         return Math.round(this.classifier.classifyDetailed(this.featureset)
-                .getProbabilityFor(this.proposal.getID()) * 100.0f);
+                .getProbabilityFor(this.replaceString) * 100.0f);
     }
 
 }

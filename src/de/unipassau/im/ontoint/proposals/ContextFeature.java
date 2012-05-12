@@ -1,24 +1,65 @@
 package de.unipassau.im.ontoint.proposals;
 
-public class ContextFeature {
+import java.io.Serializable;
 
-    private ContextFeature.Feature featureType;
+/**
+ * A feature of a given context.  Features will be extracted from the context
+ * within the {@link CompletionProposalComputer} instance and stored by the
+ * {@link Classifier} instance used.
+ *
+ * @author Philipp Nolte
+ */
+public final class ContextFeature implements Serializable {
 
-    private Object value;
+    /**
+     * SUID.
+     */
+    private static final long serialVersionUID = -2040479825727826019L;
 
+    /**
+     * Features can be of different type.
+     */
     public static enum Feature {
+
+        /**
+         * A basic String found in the context.
+         */
         ENVIRONMENTSTRING
+
     }
 
-    public ContextFeature(ContextFeature.Feature type, Object featureValue) {
-        this.featureType = type;
+    /**
+     * The type of this feature.
+     */
+    private ContextFeature.Feature type;
+
+    /**
+     * The value of this feature.
+     */
+    private Serializable value;
+
+    /**
+     * Constructs a new context feature of given type and with given value.
+     *
+     * @param featureType the type of the feature
+     * @param featureValue the value of the feature
+     */
+    public ContextFeature(final ContextFeature.Feature featureType,
+            final Serializable featureValue) {
+        this.type = featureType;
         this.value = featureValue;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public int hashCode() {
-        return this.value.hashCode() * this.featureType.hashCode();
+        return this.value.hashCode() * this.type.hashCode();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
@@ -27,7 +68,7 @@ public class ContextFeature {
         if (getClass() != obj.getClass())
             return false;
         final ContextFeature other = (ContextFeature) obj;
-        if (featureType != other.featureType)
+        if (type != other.type)
             return false;
         if (value == null) {
             if (other.value != null)
@@ -36,9 +77,23 @@ public class ContextFeature {
             return false;
         return true;
     }
-    
-    public String toString() {
-        return this.featureType.toString() + ":" + this.value.toString();
+
+    /**
+     * Gets the feature's type.
+     *
+     * @return the type
+     */
+    public ContextFeature.Feature getFeatureType() {
+        return this.type;
+    }
+
+    /**
+     * Gets the feature's value.
+     *
+     * @return the value
+     */
+    public Serializable getValue() {
+        return this.value;
     }
 
 }
