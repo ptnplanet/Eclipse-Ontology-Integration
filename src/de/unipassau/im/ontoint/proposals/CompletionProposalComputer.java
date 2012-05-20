@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
@@ -28,6 +29,13 @@ public final class CompletionProposalComputer implements
         IJavaCompletionProposalComputer {
 
     /**
+     * The default number of features in front or behind the current
+     * invocation context to retrieve.
+     */
+    public static final int DEFAULT_FEATURES_INFRONT = 3;
+    public static final int DEFAULT_FEATURES_BEHIND = 2;
+
+    /**
      * Extracts a collection of features from the given context.
      *
      * @param context the context
@@ -35,17 +43,59 @@ public final class CompletionProposalComputer implements
      */
     public static Collection<ContextFeature> getFeatures(
             final ContentAssistInvocationContext context) {
+        return CompletionProposalComputer.getFeatures(context,
+                CompletionProposalComputer.DEFAULT_FEATURES_INFRONT,
+                CompletionProposalComputer.DEFAULT_FEATURES_BEHIND);
+    }
 
-        String[] features;
+    /**
+     * Extracts a collection of features from the given context.
+     *
+     * @param context the context
+     * @param before the number of features in front of the invocation offset
+     * @param after the number of features behind the invocation offset
+     * @return the featureset
+     */
+    public static Collection<ContextFeature> getFeatures(
+            final ContentAssistInvocationContext context,
+            final int before, final int after) {
+        Assert.isTrue(before >= 0);
+        Assert.isTrue(after >= 0);
+
+        String[] features = new String[before + after];
+        int j = 0;
         try {
-            features = context.getDocument().get(context.getInvocationOffset() - 20, 20).split("\\s");
+            final String[] tokensInFront = context.getDocument()
+                    .get(0, context.getInvocationOffset()).split("\\W+");
+            final String[] tokensBehind = context.getDocument()
+                    .get(context.getInvocationOffset(),
+                            (context.getDocument().getLength()
+                                    - context.getInvocationOffset()))
+                    .split("\\W+");
+            int leftBorder =
+                    Math.max(tokensInFront.length - before, 0);
+            int rightBorder =
+                    Math.max(Math.min(after, tokensBehind.length - 1), 0);
+            for (int i = tokensInFront.length - 1; i > leftBorder; i--, j++) {
+                features[j] = tokensInFront[i];
+            }
+            for (int i = 0; i <= rightBorder; i++, j++) {
+                features[j] = tokensBehind[i];
+            }
         } catch (BadLocationException e) {
             features = new String[0];
         }
-        Collection<ContextFeature> toReturn = new LinkedList<ContextFeature>();
 
-        ContextFeature feature = new ContextFeature(ContextFeature.Feature.ENVIRONMENTSTRING, features[features.length - 1]);
-        toReturn.add(feature);
+        Collection<ContextFeature> toReturn = new LinkedList<ContextFeature>();
+        for (String feature : features) {
+            System.out.println("> " + feature);
+            if (feature != null) {
+                ContextFeature toAdd = new ContextFeature(
+                        ContextFeature.Feature.ENVIRONMENTSTRING, feature);
+                toReturn.add(toAdd);
+            }
+        }
+        System.out.println();
         return toReturn;
     }
 
@@ -77,7 +127,7 @@ public final class CompletionProposalComputer implements
 
         // Get the featureset.
         final Collection<ContextFeature> features =
-                CompletionProposalComputer.getFeatures(context);
+                CompletionProposalComputer.getFeatures(context, 3, 2);
 
         // Instantiate the list to return
         final List<ICompletionProposal> toReturn =

@@ -60,6 +60,11 @@ public final class WrappedOWLEntity {
         OWLAnnotationProperty,
 
         /**
+         * An OWL ontology.
+         */
+        OWLOntology,
+
+        /**
          * Other type or unknown.
          */
         Other
@@ -128,6 +133,18 @@ public final class WrappedOWLEntity {
     }
 
     /**
+     * Creates a new instance from the {@link OWLOntology} given.
+     *
+     * @param ontology the ontology to create a wrapped version of
+     */
+    public WrappedOWLEntity(final OWLOntology ontology) {
+        this.longID = ontology.getOntologyID().toString();
+        this.shortID = this.longID.substring(this.longID.lastIndexOf('/') + 1,
+                this.longID.length() - 1);
+        this.type = WrappedOWLEntity.Types.OWLOntology;
+    }
+
+    /**
      * Generates a short version of the given entity ID.
      *
      * @param id the long id
@@ -188,6 +205,8 @@ public final class WrappedOWLEntity {
             final OWLOntology ontology) {
         Set<WrappedOWLEntity> toReturn = new HashSet<WrappedOWLEntity>();
 
+        toReturn.add(WrappedOWLEntity.getEntityFor(ontology));
+
         for (OWLClass c : ontology.getClassesInSignature(false))
             toReturn.add(WrappedOWLEntity.getEntityFor(c));
 
@@ -216,6 +235,24 @@ public final class WrappedOWLEntity {
         if (toReturn == null) {
             toReturn = new WrappedOWLEntity(entity);
             WrappedOWLEntity.cache.put(entity.toStringID(), toReturn);
+        }
+        return toReturn;
+    }
+
+    /**
+     * Retrieves an cached instance (if it exists) for the ontology given or
+     * creates a new instance if no cached singleton instance was found.
+     *
+     * @param ontology the ontology to wrap
+     * @return the wrapped entity instance
+     */
+    public static WrappedOWLEntity getEntityFor(final OWLOntology ontology) {
+        String id = ontology.getOntologyID().toString();
+        WrappedOWLEntity toReturn =
+                WrappedOWLEntity.cache.get(id);
+        if (toReturn == null) {
+            toReturn = new WrappedOWLEntity(ontology);
+            WrappedOWLEntity.cache.put(id, toReturn);
         }
         return toReturn;
     }

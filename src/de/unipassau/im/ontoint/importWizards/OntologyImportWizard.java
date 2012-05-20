@@ -1,7 +1,5 @@
 package de.unipassau.im.ontoint.importWizards;
 
-import java.io.File;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;

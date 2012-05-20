@@ -12,7 +12,7 @@ public interface IFeatureProbability<T, K> {
 
     /**
      * Calculates the probability for the given feature to appear in the given
-     * category:
+     * category.
      *   number of occurrences of feature in category
      * / number of total occurences of category
      *

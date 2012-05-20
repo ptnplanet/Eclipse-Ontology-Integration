@@ -10,6 +10,9 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import de.unipassau.im.ontoint.OntointActivator;
 
+/**
+ * Handles removing ontologies from the model.
+ */
 public final class RemoveOntologyHandler implements IHandler {
 
     /**

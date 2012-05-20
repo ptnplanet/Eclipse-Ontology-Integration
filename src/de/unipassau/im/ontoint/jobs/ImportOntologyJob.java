@@ -1,6 +1,5 @@
 package de.unipassau.im.ontoint.jobs;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -88,10 +87,8 @@ public abstract class ImportOntologyJob extends Job
      */
     private void reportExceptions() {
         if (this.exceptions != null) {
-            for (Iterator<IStatus> it = this.exceptions.iterator();
-                    it.hasNext();) {
-                StatusManager.getManager().handle(it.next(),
-                        StatusManager.SHOW);
+            for (IStatus e : this.exceptions) {
+                StatusManager.getManager().handle(e, StatusManager.SHOW);
             }
         }
     }

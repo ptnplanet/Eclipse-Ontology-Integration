@@ -15,7 +15,9 @@ import de.unipassau.im.ontoint.OntointLog;
 import de.unipassau.im.ontoint.model.WrappedOWLOntology;
 import de.unipassau.im.ontoint.views.ClassHierarchyView;
 
-
+/**
+ * Handles the show class hierarchy command.
+ */
 public final class ShowClassHierarchyHandler implements IHandler {
 
     /**
