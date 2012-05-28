@@ -9,7 +9,7 @@ import java.io.Serializable;
  *
  * @author Philipp Nolte
  */
-public final class ContextFeature implements Serializable {
+public final class ContextFeature implements Serializable, IWeightedFeature {
 
     /**
      * SUID.
@@ -27,6 +27,17 @@ public final class ContextFeature implements Serializable {
         ENVIRONMENTSTRING
 
     }
+
+    /**
+     * The feature weights.
+     */
+    public static float[] FeatureWeight = new float[] {
+
+        /**
+         * ENVIRONMENTSTRING
+         */
+        1.0f
+    };
 
     /**
      * The type of this feature.
@@ -94,6 +105,13 @@ public final class ContextFeature implements Serializable {
      */
     public Serializable getValue() {
         return this.value;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public float getWeight() {
+        return ContextFeature.FeatureWeight[this.getFeatureType().ordinal()];
     }
 
 }

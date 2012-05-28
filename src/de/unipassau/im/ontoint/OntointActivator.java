@@ -100,18 +100,18 @@ public final class OntointActivator extends AbstractUIPlugin {
     public void start(final BundleContext context) throws Exception {
         super.start(context);
         OntointActivator.plugin = this;
-
+    
         // Register an icon for this plugin's jobs.
         this.getWorkbench().getProgressService().registerIconForFamily(
                 OntointActivator.imageDescriptorFromPlugin(
                         OntointActivator.PLUGIN_ID, "/icons/import.gif"),
                 OntointActivator.PLUGIN_ID);
-
+    
         // Load the serialized classifier or fall back to an empty one.
         if (!this.deserialize || !this.loadClassifier()) {
             this.classifier = new BayesClassifier<ContextFeature, String>();
         }
-
+    
         // Load all recently opened ontologies
         this.importRecentOntologies();
     }
@@ -193,16 +193,7 @@ public final class OntointActivator extends AbstractUIPlugin {
             ObjectInputStream o = new ObjectInputStream(fis);
             Object obj = o.readObject();
             this.classifier = (Classifier<ContextFeature, String>) obj;
-        } catch (FileNotFoundException e) {
-            OntointLog.logError(e);
-            return false;
-        } catch (IOException e) {
-            OntointLog.logError(e);
-            return false;
-        } catch (ClassNotFoundException e) {
-            OntointLog.logError(e);
-            return false;
-        } catch (ClassCastException e) {
+        } catch (Exception e) {
             OntointLog.logError(e);
             return false;
         } finally {
@@ -215,7 +206,7 @@ public final class OntointActivator extends AbstractUIPlugin {
         }
         return true;
     }
-
+    
     /**
      * Serialize the classifier.
      *
@@ -228,7 +219,7 @@ public final class OntointActivator extends AbstractUIPlugin {
                     this.getPluginFile("classifier.serialized"));
             ObjectOutputStream o = new ObjectOutputStream(fos);
             o.writeObject(this.classifier);
-        } catch (IOException e) {
+        } catch (Exception e) {
             OntointLog.logError(e);
             return false;
         } finally {

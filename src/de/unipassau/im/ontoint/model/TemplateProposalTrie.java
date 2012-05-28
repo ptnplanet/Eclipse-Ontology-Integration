@@ -20,7 +20,7 @@ public final class TemplateProposalTrie implements Set<WrappedOWLEntity> {
     /**
      * This node's value.
      */
-    private WrappedOWLEntity value;
+    private Set<WrappedOWLEntity> values;
 
     /**
      * A dictionary table containing references to the child nodes according to
@@ -30,12 +30,13 @@ public final class TemplateProposalTrie implements Set<WrappedOWLEntity> {
             new Hashtable<Character, TemplateProposalTrie>();
 
     /**
-     * Flag indicating if an array sequence ends in this node.  This is crucial
-     * to know, because the sequence "hello" can contain both the words "hell"
-     * and "hello". The nodes holding these values will have this flag set to
-     * <code>true</code>.
+     * Are there any values stored in this node?
+     *
+     * @return <code>true</code> if there are values
      */
-    private boolean flag = false;
+    private boolean flagged() {
+        return (this.values != null) && (this.values.size() > 0);
+    }
 
     /**
      * {@inheritDoc}
@@ -51,8 +52,6 @@ public final class TemplateProposalTrie implements Set<WrappedOWLEntity> {
          */
         if (eID == null)
             throw new NullPointerException();
-        if (eID.length() == 0)
-            return this.flag ? false : (this.flag = true);
 
         /*
          * Walk through the array to add and make sure an edge for every array
@@ -65,8 +64,11 @@ public final class TemplateProposalTrie implements Set<WrappedOWLEntity> {
                 node.addEdge(element);
             node = node.children.get(element);
         }
-        node.value = e;
-        return node.flag ? false : (node.flag = true);
+
+        if (node.values == null)
+            node.values = new HashSet<WrappedOWLEntity>();
+
+        return node.values.contains(e) ? false : node.values.add(e);
     }
 
     /**
@@ -92,7 +94,9 @@ public final class TemplateProposalTrie implements Set<WrappedOWLEntity> {
      * {@inheritDoc}
      */
     public void clear() {
-        this.value = null;
+        this.values = null;
+        for (TemplateProposalTrie child : this.children.values())
+            child.clear();
         this.children.clear();
     }
 
@@ -113,7 +117,7 @@ public final class TemplateProposalTrie implements Set<WrappedOWLEntity> {
                 return false;
             node = node.children.get(element);
         }
-        return node.flag;
+        return node.flagged() ? node.values.contains(o) : false;
     }
 
     /**
@@ -133,7 +137,8 @@ public final class TemplateProposalTrie implements Set<WrappedOWLEntity> {
      * {@inheritDoc}
      */
     public boolean isEmpty() {
-        return this.children.isEmpty() && !this.flag;
+        return this.children.isEmpty()
+                && ((this.values == null) || (this.values.size() == 0));
     }
 
     /**
@@ -190,8 +195,8 @@ public final class TemplateProposalTrie implements Set<WrappedOWLEntity> {
          * Zero length arrays can only be removed, when this root node contains
          * the zero length value.
          */
-        if ((array.length == 0) && (this.value == null))
-            return this.flag ? (this.flag = false) : false;
+        if ((array.length == 0) && this.flagged())
+            return this.values.remove(o);
 
         TemplateProposalTrie node = this;
         TemplateProposalTrie lastEndNode = this;
@@ -199,7 +204,7 @@ public final class TemplateProposalTrie implements Set<WrappedOWLEntity> {
         for (int i = 0; i < array.length; i++) {
 
             // Remember the last end node.
-            if ((node.flag) && (i < (array.length - 1))) {
+            if (node.flagged() && (i < (array.length - 1))) {
                 lastEndNode = node;
                 lastEndIndex = i;
             }
@@ -212,7 +217,7 @@ public final class TemplateProposalTrie implements Set<WrappedOWLEntity> {
          * Delete all subtrees leading from the last end node to the end of the
          * array to delete.
          */
-        if (node.flag) {
+        if (node.flagged()) {
             node = lastEndNode;
             for (int i = lastEndIndex; i < array.length; i++) {
                 lastEndNode = node.children.get(array[i]);
@@ -271,8 +276,8 @@ public final class TemplateProposalTrie implements Set<WrappedOWLEntity> {
      */
     public Set<WrappedOWLEntity> postfixes() {
         final Set<WrappedOWLEntity> toReturn = new HashSet<WrappedOWLEntity>();
-        if (this.flag) {
-            toReturn.add(this.value);
+        if (this.flagged()) {
+            toReturn.addAll(this.values);
         }
 
         for (TemplateProposalTrie t : this.children.values())

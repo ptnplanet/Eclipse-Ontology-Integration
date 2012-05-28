@@ -1,6 +1,8 @@
 package de.unipassau.im.ontoint.proposals;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.SortedSet;
@@ -54,7 +56,11 @@ public final class BayesClassifier<T, K> extends Classifier<T, K>
             final K category) {
         float product = 1.0f;
         for (T feature : features)
-            product *= this.featureWeighedAverage(feature, category);
+            if (feature instanceof IWeightedFeature)
+                product *= this.featureWeightedAverage(feature, category, this,
+                        (((IWeightedFeature) feature).getWeight()));
+            else
+                product *= this.featureWeightedAverage(feature, category);
         return product;
     }
 

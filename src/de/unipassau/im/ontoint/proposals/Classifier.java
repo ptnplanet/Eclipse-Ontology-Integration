@@ -300,14 +300,14 @@ public abstract class Classifier<T, K> implements IFeatureProbability<T, K>,
      * probability.
      *
      * @see Classifier#featureProbability(Object, Object)
-     * @see Classifier#featureWeighedAverage(Object, Object, IFeatureProbability, float, float)
+     * @see Classifier#featureWeightedAverage(Object, Object, IFeatureProbability, float, float)
      *
      * @param feature the feature, which probability to calculate
      * @param category the category
      * @return the weighed average probability
      */
-    public float featureWeighedAverage(final T feature, final K category) {
-        return this.featureWeighedAverage(feature, category,
+    public float featureWeightedAverage(final T feature, final K category) {
+        return this.featureWeightedAverage(feature, category,
                 null, 1.0f, Classifier.DEFAULT_ASSUMEND_PROPABILITY);
     }
 
@@ -316,16 +316,16 @@ public abstract class Classifier<T, K> implements IFeatureProbability<T, K>,
      * overall weight of <code>1.0</code>, an assumed probability of
      * <code>0.5</code> and the given object to use for probability calculation.
      *
-     * @see Classifier#featureWeighedAverage(Object, Object, IFeatureProbability, float, float)
+     * @see Classifier#featureWeightedAverage(Object, Object, IFeatureProbability, float, float)
      *
      * @param feature the feature, which probability to calculate
      * @param category the category
      * @param calculator the calculating object
      * @return the weighed average probability
      */
-    public float featureWeighedAverage(final T feature, final K category,
+    public float featureWeightedAverage(final T feature, final K category,
             final IFeatureProbability<T, K> calculator) {
-        return this.featureWeighedAverage(feature, category,
+        return this.featureWeightedAverage(feature, category,
                 calculator, 1.0f, Classifier.DEFAULT_ASSUMEND_PROPABILITY);
     }
 
@@ -334,7 +334,7 @@ public abstract class Classifier<T, K> implements IFeatureProbability<T, K>,
      * the given weight and an assumed probability of <code>0.5</code> and the
      * given object to use for probability calculation.
      *
-     * @see Classifier#featureWeighedAverage(Object, Object, IFeatureProbability, float, float)
+     * @see Classifier#featureWeightedAverage(Object, Object, IFeatureProbability, float, float)
      *
      * @param feature the feature, which probability to calculate
      * @param category the category
@@ -342,9 +342,9 @@ public abstract class Classifier<T, K> implements IFeatureProbability<T, K>,
      * @param weight the feature weight
      * @return the weighed average probability
      */
-    public float featureWeighedAverage(final T feature, final K category,
+    public float featureWeightedAverage(final T feature, final K category,
             IFeatureProbability<T, K> calculator, float weight) {
-        return this.featureWeighedAverage(feature, category,
+        return this.featureWeightedAverage(feature, category,
                 calculator, weight, Classifier.DEFAULT_ASSUMEND_PROPABILITY);
     }
 
@@ -360,7 +360,7 @@ public abstract class Classifier<T, K> implements IFeatureProbability<T, K>,
      * @param assumedProbability the assumed probability
      * @return the weighed average probability
      */
-    public float featureWeighedAverage(final T feature, final K category,
+    public float featureWeightedAverage(final T feature, final K category,
             final IFeatureProbability<T, K> calculator, final float weight,
             final float assumedProbability) {
 
@@ -377,7 +377,7 @@ public abstract class Classifier<T, K> implements IFeatureProbability<T, K>,
         Integer totals = this.totalFeatureCount.get(feature);
         if (totals == null)
             totals = 0;
-        return (weight * assumedProbability + totals  * basicProbability)
+        return (weight * assumedProbability + totals * basicProbability)
                 / (weight + totals);
     }
 

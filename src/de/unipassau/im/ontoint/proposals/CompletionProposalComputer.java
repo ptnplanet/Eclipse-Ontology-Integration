@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
@@ -43,7 +44,9 @@ public final class CompletionProposalComputer implements
      */
     public static Collection<ContextFeature> getFeatures(
             final ContentAssistInvocationContext context) {
-        return CompletionProposalComputer.getFeatures(context,
+        return CompletionProposalComputer.getFeatures(
+                context.getInvocationOffset(),
+                context.getDocument().get(),
                 CompletionProposalComputer.DEFAULT_FEATURES_INFRONT,
                 CompletionProposalComputer.DEFAULT_FEATURES_BEHIND);
     }
@@ -51,13 +54,15 @@ public final class CompletionProposalComputer implements
     /**
      * Extracts a collection of features from the given context.
      *
+     * @param caretPos the invocation context offset
      * @param context the context
      * @param before the number of features in front of the invocation offset
      * @param after the number of features behind the invocation offset
      * @return the featureset
      */
     public static Collection<ContextFeature> getFeatures(
-            final ContentAssistInvocationContext context,
+            final int caretPos,
+            final String context,
             final int before, final int after) {
         Assert.isTrue(before >= 0);
         Assert.isTrue(after >= 0);
@@ -65,12 +70,10 @@ public final class CompletionProposalComputer implements
         String[] features = new String[before + after];
         int j = 0;
         try {
-            final String[] tokensInFront = context.getDocument()
-                    .get(0, context.getInvocationOffset()).split("\\W+");
-            final String[] tokensBehind = context.getDocument()
-                    .get(context.getInvocationOffset(),
-                            (context.getDocument().getLength()
-                                    - context.getInvocationOffset()))
+            final String[] tokensInFront = context
+                    .substring(0, caretPos).split("\\W+");
+            final String[] tokensBehind = context
+                    .substring(caretPos, (context.length() - caretPos))
                     .split("\\W+");
             int leftBorder =
                     Math.max(tokensInFront.length - before, 0);
@@ -82,20 +85,18 @@ public final class CompletionProposalComputer implements
             for (int i = 0; i <= rightBorder; i++, j++) {
                 features[j] = tokensBehind[i];
             }
-        } catch (BadLocationException e) {
+        } catch (IndexOutOfBoundsException e) {
             features = new String[0];
         }
 
         Collection<ContextFeature> toReturn = new LinkedList<ContextFeature>();
         for (String feature : features) {
-            System.out.println("> " + feature);
             if (feature != null) {
                 ContextFeature toAdd = new ContextFeature(
                         ContextFeature.Feature.ENVIRONMENTSTRING, feature);
                 toReturn.add(toAdd);
             }
         }
-        System.out.println();
         return toReturn;
     }
 
@@ -127,7 +128,7 @@ public final class CompletionProposalComputer implements
 
         // Get the featureset.
         final Collection<ContextFeature> features =
-                CompletionProposalComputer.getFeatures(context, 3, 2);
+                CompletionProposalComputer.getFeatures(context);
 
         // Instantiate the list to return
         final List<ICompletionProposal> toReturn =

@@ -3,6 +3,8 @@ package de.unipassau.im.ontoint.proposals;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.SortedSet;
 
 /**
  * Instances of this class wrap a collection of classifications in order to
@@ -26,6 +28,12 @@ public final class DetailedClassification<T, K> {
     private Map<K, Float> categoryProbabilities;
 
     /**
+     * FOR EVALUATION PURPOSE ONLY! Maps the positions in the sorted set to the
+     * category.
+     */
+    private Map<K, Integer> categoryPositions;
+
+    /**
      * Constructs a new DetailedClassification with the parameters given.
      *
      * @param features the featureset
@@ -33,11 +41,17 @@ public final class DetailedClassification<T, K> {
      *  featureset
      */
     public DetailedClassification(final Collection<T> features,
-            final Collection<Classification<T, K>> classifications) {
+            final SortedSet<Classification<T, K>> classifications) {
         this.featureset = features;
         this.categoryProbabilities = new Hashtable<K, Float>();
-        for (Classification<T, K> c : classifications)
+        this.categoryPositions = new Hashtable<K, Integer>();
+
+        int position = classifications.size();
+        for (Classification<T, K> c : classifications) {
             this.categoryProbabilities.put(c.getCategory(), c.getProbability());
+            this.categoryPositions.put(c.getCategory(), new Integer(position));
+            position--;
+        }
     }
 
     /**
@@ -51,13 +65,43 @@ public final class DetailedClassification<T, K> {
 
     /**
      * Retrieves the classification's probability.
-     * @return
+     *
+     * @param category the category
+     * @return the probability
      */
-    public float getProbabilityFor(K category) {
+    public float getProbabilityFor(final K category) {
         Float toReturn = this.categoryProbabilities.get(category);
         if (toReturn == null)
             return 0.0f;
         return toReturn.floatValue();
+    }
+
+    /**
+     * FOR EVALUATION PURPOSES ONLY. Returns the categories's position in the
+     * sorted classification set.
+     *
+     * @param category the category
+     * @return the position
+     */
+    public int getPositionFor(final K category) {
+        Integer toReturn = this.categoryPositions.get(category);
+        if (toReturn == null)
+            return this.categoryPositions.size();
+        return toReturn.intValue();
+    }
+
+    /**
+     * FOR EVALUATION PURPOSES ONLY. Returns the category at the given position.
+     *
+     * @param position the position
+     * @return the category
+     */
+    public K getCategoryAtPosition(final int position) {
+        for (Entry<K, Integer> e : this.categoryPositions.entrySet()) {
+            if (e.getValue().intValue() == position)
+                return e.getKey();
+        }
+        return null;
     }
 
 }
